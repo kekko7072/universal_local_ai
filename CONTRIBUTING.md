@@ -46,3 +46,19 @@ traceable to an implementation, test, registry, or upstream project.
 Publishing is a separate, explicitly authorized operation that runs in each
 package's own repository; see [docs/releasing.md](docs/releasing.md). Merging a pull
 request in this umbrella repository must not publish a package.
+
+## AI-assisted contributions
+
+AI coding assistants (Claude, Copilot, Cursor and others) are welcome as
+tools. The person who submits a change is its only author and is responsible
+for it:
+
+- **Commit as yourself.** The commit author and committer are the human
+  contributor. Never commit as an AI identity such as
+  `Claude <noreply@anthropic.com>`.
+- **No AI attribution.** Commit messages, pull request titles and
+  descriptions, changelogs and release notes must not credit an AI tool. That
+  means no `Co-Authored-By:` trailers for AI assistants, no
+  "Generated with ..." lines, and no assistant session links.
+- **Review before you submit.** Read, test and understand every AI-written
+  line as if you had written it yourself.
