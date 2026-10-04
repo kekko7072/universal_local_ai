@@ -119,10 +119,12 @@ equivalent to native tool calling or schema-constrained output.
 - Root CI detects affected families; package workflows own detailed checks.
 - No root workflow publishes automatically.
 
-## Migration and history
+## Repositories and submodules
 
-Existing repositories remain authoritative until their reviewed import. Git
-history should be retained with `git subtree` or a history-preserving filter
-into the final package path. The exact method should be trialed on a temporary
-branch before changing the monorepo. Tags and release notes remain documented
-even if tags cannot be merged cleanly into one namespace.
+Every package is its own repository and stays there: history, tags, issues,
+CI and releases all live with the package. This umbrella repository does not
+import package code. It links each repository as a top-level git submodule,
+pins a combination that passed its CI, and hosts the shared architecture,
+platform facts and release process. Moving code between packages (for
+example, Flutter's host-neutral Dart into `dart_local_ai`) happens between
+those repositories, never by copying it into this one.

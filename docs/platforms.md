@@ -45,7 +45,7 @@ adapter (beta, macOS 26+) and an explicit `unavailable` on other platforms.
 It has only been tested against the fake backend; the Apple path has not been
 exercised from Python on hardware yet.
 
-## Not yet implemented in this monorepo
+## Not yet implemented
 
 `dart_local_ai` does not yet claim a backend here. Apple,
 Windows, Android, Linux, and browser integrations for those packages are

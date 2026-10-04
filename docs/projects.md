@@ -61,8 +61,8 @@ Current CI checks the declared Flutter/Dart floor and pinned current toolchain,
 formatting, analysis, VM and Chrome tests, a web example build, configured and
 unconfigured Windows builds, generated Pigeon output, and a pub publish dry
 run. Separate workflows implement tagged publishing and release automation.
-The monorepo must preserve equivalent checks but must not inherit automatic
-publishing without explicit authorization.
+Those checks stay in `flutter_local_ai`. The umbrella CI runs `flutter analyze`
+and `flutter test` at the pinned commit and never publishes.
 
 ### Migration path
 
@@ -76,7 +76,8 @@ publishing without explicit authorization.
 5. Make `flutter_local_ai` depend on and re-export the shared package where
    compatible; retain plugin transport, native code, genUI, and facade.
 6. Run old tests plus pure-Dart consumer tests and all native build jobs.
-7. Import history into final paths only after this boundary passes.
+7. Release both packages from their own repositories and re-pin the
+   submodules here.
 
 ## `rust_local_ai`
 
@@ -97,10 +98,6 @@ publishing without explicit authorization.
 - Downstream: `python_local_ai` binds this crate through PyO3, and the planned
   `@typescript_local_ai/native` addon will bind it for Node.
 - CI and release: the repository has its own CI and release workflows.
-
-Migration should preserve the standalone repository's history while placing
-the crate at `packages/rust/rust_local_ai`. Do not copy it into the target
-directory.
 
 ## `typescript_local_ai`
 
@@ -142,6 +139,6 @@ directory.
 
 ## Planned repositories
 
-No repository named `dart_local_ai` appeared in the inspected GitHub owner
-inventory. Its directory in this foundation is a planning boundary, not a
-package and not a registry claim.
+No repository named `dart_local_ai` exists yet. It is planned as its own
+repository, to be added here as a submodule once it exists; until then it is
+neither a package nor a registry claim.

@@ -108,36 +108,35 @@ owns the behavior; the React, Vue, Svelte and Next.js subpaths are thin
 adapters over it inside the same package. Rust stays idiomatic Rust and is the
 native core for the Python bindings and the Node backend.
 
-The migration is incremental. Existing repositories, public APIs, histories,
-tests, examples, release metadata, licenses, and CI behavior are preserved
-until a reviewed import plan says otherwise. See the full
+The migration is incremental. Each repository keeps its public API, history,
+tests, examples, release metadata, license, and CI. See the full
 [architecture](docs/architecture.md), [API philosophy](docs/api-philosophy.md),
 [project inventory](docs/projects.md), [releasing](docs/releasing.md), and
 [roadmap](docs/roadmap.md).
 
 ## Repository layout
 
-```text
-packages/       Independently publishable libraries, grouped by ecosystem
-examples/       Consumer examples, separate from package implementation
-docs/           Architecture, support facts, and migration decisions
-.github/        Change-aware validation of pinned packages; never publishes
-```
-
-Most package directories are foundations only during Phase 1. The standalone
-repositories are linked as git submodules at the top level so their history
-stays intact until migration:
+Each package lives in its own repository, with its own history, CI and
+release workflow. This repository links them as git submodules at the top
+level and pins a tested combination:
 
 ```text
 flutter_local_ai/      kekko7072/flutter_local_ai, pinned at v0.2.1
 rust_local_ai/         kekko7072/rust_local_ai, pinned at main
 typescript_local_ai/   kekko7072/typescript_local_ai, pinned at main
 python_local_ai/       kekko7072/python_local_ai, pinned at main
+examples/              Consumer examples, separate from package implementation
+docs/                  Architecture, support facts, and release process
+.github/               Validation of the pinned packages; never publishes
 ```
 
+A new package (for example `dart_local_ai`) gets its own repository first and
+is then added here with `git submodule add`.
+
 Clone with `git clone --recurse-submodules`, or run
-`git submodule update --init` in an existing checkout. No existing
-implementation has been copied or rewritten as part of this foundation.
+`git submodule update --init` in an existing checkout. Package code is never
+copied into this repository; change it in the package's repository and re-pin
+the submodule here.
 
 ## Contributing
 

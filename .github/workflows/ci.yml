@@ -43,24 +43,20 @@ jobs:
             dart:
               - *ci
               - 'flutter_local_ai'
-              - 'packages/dart/**'
               - 'examples/dart/**'
               - 'examples/flutter/**'
             rust:
               - *ci
               - 'rust_local_ai'
-              - 'packages/rust/**'
               - 'examples/rust/**'
             typescript:
               - *ci
               - 'typescript_local_ai'
-              - 'packages/typescript/**'
               - 'examples/typescript/**'
               - 'examples/nextjs/**'
             python:
               - *ci
               - 'python_local_ai'
-              - 'packages/python/**'
               - 'examples/python/**'
 
   foundation:
@@ -76,11 +72,6 @@ jobs:
             README.md LICENSE CONTRIBUTING.md CODE_OF_CONDUCT.md
             docs/architecture.md docs/api-philosophy.md docs/platforms.md
             docs/roadmap.md docs/projects.md docs/dart-migration.md docs/releasing.md
-            packages/dart/dart_local_ai/README.md
-            packages/dart/flutter_local_ai/README.md
-            packages/rust/rust_local_ai/README.md
-            packages/typescript/typescript_local_ai/README.md
-            packages/python/python_local_ai/README.md
             .gitmodules
           )
           for path in "${required[@]}"; do
@@ -90,13 +81,9 @@ jobs:
             git config --file .gitmodules --get "submodule.$submodule.url" >/dev/null \
               || { echo "Missing submodule entry: $submodule"; exit 1; }
           done
-          if test -d packages/typescript/next_local_ai; then
-            echo 'next_local_ai is replaced by the typescript_local_ai/next subpath.'
-            exit 1
-          fi
-          if grep -R --line-number --include='pubspec.yaml' \
-            'sdk: flutter' packages/dart/dart_local_ai; then
-            echo 'dart_local_ai must not depend on Flutter.'
+          # Package code lives only in the package repositories (submodules).
+          if test -e packages; then
+            echo 'packages/ is gone: each package is its own repository, linked as a submodule.'
             exit 1
           fi
 
