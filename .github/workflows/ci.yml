@@ -31,10 +31,12 @@ jobs:
         with:
           filters: |
             dart:
+              - 'flutter_local_ai'
               - 'packages/dart/**'
               - 'examples/dart/**'
               - 'examples/flutter/**'
             rust:
+              - 'rust_local_ai'
               - 'rust_local_ai/**'
               - 'packages/rust/**'
               - 'examples/rust/**'

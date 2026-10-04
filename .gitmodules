@@ -1,3 +1,6 @@
 [submodule "rust_local_ai"]
 	path = rust_local_ai
 	url = https://github.com/kekko7072/rust_local_ai.git
+[submodule "flutter_local_ai"]
+	path = flutter_local_ai
+	url = https://github.com/kekko7072/flutter_local_ai.git

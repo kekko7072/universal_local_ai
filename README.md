@@ -108,10 +108,18 @@ docs/           Architecture, support facts, and migration decisions
 .github/        Change-aware validation; publishing is intentionally absent
 ```
 
-Most package directories are foundations only during Phase 1. A concurrently
-added top-level `rust_local_ai/` API scaffold is preserved in place pending a
-history and ownership review; no existing implementation has been copied or
-rewritten as part of this foundation.
+Most package directories are foundations only during Phase 1. The standalone
+repositories are linked as git submodules at the top level so their history
+stays intact until migration:
+
+```text
+flutter_local_ai/   kekko7072/flutter_local_ai, pinned at v0.2.1
+rust_local_ai/      kekko7072/rust_local_ai API scaffold
+```
+
+Clone with `git clone --recurse-submodules`, or run
+`git submodule update --init` in an existing checkout. No existing
+implementation has been copied or rewritten as part of this foundation.
 
 ## Contributing
 
