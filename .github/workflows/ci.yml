@@ -1,0 +1,100 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  changes:
+    name: Detect affected packages
+    runs-on: ubuntu-latest
+    outputs:
+      dart: ${{ steps.filter.outputs.dart }}
+      rust: ${{ steps.filter.outputs.rust }}
+      typescript: ${{ steps.filter.outputs.typescript }}
+      docs: ${{ steps.filter.outputs.docs }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            dart:
+              - 'packages/dart/**'
+              - 'examples/dart/**'
+              - 'examples/flutter/**'
+            rust:
+              - 'rust_local_ai/**'
+              - 'packages/rust/**'
+              - 'examples/rust/**'
+            typescript:
+              - 'packages/typescript/**'
+              - 'examples/typescript/**'
+              - 'examples/nextjs/**'
+            docs:
+              - '**/*.md'
+              - 'LICENSE'
+              - '.github/**'
+
+  foundation:
+    name: Validate foundation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check required files and package boundaries
+        shell: bash
+        run: |
+          set -euo pipefail
+          required=(
+            README.md LICENSE CONTRIBUTING.md CODE_OF_CONDUCT.md
+            docs/architecture.md docs/api-philosophy.md docs/platforms.md
+            docs/roadmap.md docs/projects.md docs/dart-migration.md
+            packages/dart/dart_local_ai/README.md
+            packages/dart/flutter_local_ai/README.md
+            packages/rust/rust_local_ai/README.md
+            packages/typescript/typescript_local_ai/README.md
+            packages/typescript/next_local_ai/README.md
+          )
+          for path in "${required[@]}"; do
+            test -f "$path" || { echo "Missing required file: $path"; exit 1; }
+          done
+          if grep -R --line-number --include='pubspec.yaml' \
+            'sdk: flutter' packages/dart/dart_local_ai; then
+            echo 'dart_local_ai must not depend on Flutter.'
+            exit 1
+          fi
+
+  package-plan:
+    name: Report affected package checks
+    needs: changes
+    runs-on: ubuntu-latest
+    steps:
+      - name: Summarize selection
+        env:
+          DART_CHANGED: ${{ needs.changes.outputs.dart }}
+          RUST_CHANGED: ${{ needs.changes.outputs.rust }}
+          TYPESCRIPT_CHANGED: ${{ needs.changes.outputs.typescript }}
+          DOCS_CHANGED: ${{ needs.changes.outputs.docs }}
+        run: |
+          {
+            echo '## Affected areas'
+            echo "- Dart / Flutter: $DART_CHANGED"
+            echo "- Rust: $RUST_CHANGED"
+            echo "- TypeScript / Next.js: $TYPESCRIPT_CHANGED"
+            echo "- Foundation / docs: $DOCS_CHANGED"
+            echo
+            echo 'Package-specific format, lint, test, native build, example,'
+            echo 'and publication dry-run jobs will activate as manifests are imported.'
+            echo 'This workflow never publishes.'
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -1,0 +1,17 @@
+.DS_Store
+.dart_tool/
+.flutter-plugins*
+.packages
+build/
+coverage/
+target/
+node_modules/
+.next/
+dist/
+.env
+.env.*
+!.env.example
+*.log
+*.iml
+.idea/
+.vscode/
