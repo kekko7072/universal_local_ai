@@ -8,7 +8,8 @@ source repository host and package registries remain the installation source.
 
 ## `flutter_local_ai`
 
-- Repository: `kekko7072/flutter_local_ai`
+- Repository: `kekko7072/flutter_local_ai`; linked into this repository as
+  the top-level `flutter_local_ai/` git submodule, pinned at tag `v0.2.1`.
 - Registry: published on pub.dev as `flutter_local_ai`; repository manifest
   and registry both show 0.2.1 at inventory time.
 - License: MIT.
