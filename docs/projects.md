@@ -128,9 +128,21 @@ support.
 ## `python_local_ai`
 
 - Repository: `kekko7072/python_local_ai`, linked as the top-level
-  `python_local_ai/` git submodule. It contains only a README.
-- Plan: PyO3 bindings over `rust_local_ai`, published to PyPI. No
-  implementation and no registry claim.
+  `python_local_ai/` git submodule.
+- Shape: a maturin/PyO3 `abi3` extension (CPython 3.9+) that depends on
+  `rust_local_ai` at a pinned git revision. Backend behavior is never
+  reimplemented in Python.
+- API: `detect()`, `LocalAiModel`, `LocalAiSession` and `ResponseStream`.
+  Methods are awaitable, each with a `_sync` twin that releases the GIL.
+  Streams work with both `async for` and `for`. Errors form a typed
+  hierarchy with stable codes, and the package ships `py.typed` stubs.
+  `python_local_ai.testing.FakeBackend` exposes Rust's deterministic fake.
+- Backends: whatever the pinned `rust_local_ai` provides. Today that is Apple
+  Foundation Models (beta) on macOS and an explicit `unavailable` elsewhere.
+- Validation: pytest and doctests against the fake backend, `stubtest`,
+  `mypy --strict`, rustfmt and clippy. CI runs on Linux, macOS and Windows
+  with Python 3.9 and 3.13 and builds wheel and sdist artifacts.
+- Registry: not published.
 
 ## Planned repositories
 

@@ -54,7 +54,9 @@ See [Dart migration](dart-migration.md).
   `rust_local_ai`) for the Node backend.
 - [ ] Add example apps (Vite + React, Next.js, Nuxt, SvelteKit) and build them
   in CI.
-- [ ] Build `python_local_ai` as PyO3 bindings over `rust_local_ai`.
+- [x] Build `python_local_ai` as PyO3 bindings over `rust_local_ai`.
+- [ ] Validate `python_local_ai` against Apple Foundation Models on a
+  configured Mac, then publish wheels to PyPI with explicit authorization.
 - [ ] Evaluate Swift, Kotlin, Go, and React Native from concrete user and
   backend requirements.
 

@@ -30,9 +30,17 @@ The detailed, version-specific matrix remains in the existing
 React, Vue, Svelte and Next.js are supported as framework integrations
 (entry points of the same package), not as separate backends.
 
+## Python
+
+`python_local_ai` binds `rust_local_ai` and adds no backend of its own. Its
+support is exactly the pinned Rust revision's: the Apple Foundation Models
+adapter (beta, macOS 26+) and an explicit `unavailable` on other platforms.
+It has only been tested against the fake backend; the Apple path has not been
+exercised from Python on hardware yet.
+
 ## Not yet implemented in this monorepo
 
-`dart_local_ai` and `python_local_ai` do not yet claim a backend here. Apple,
+`dart_local_ai` does not yet claim a backend here. Apple,
 Windows, Android, Linux, and browser integrations for those packages are
 roadmap candidates, not support promises.
 

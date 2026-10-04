@@ -44,7 +44,7 @@ not promise backend support that has not been implemented and tested.
 | Dart | `dart_local_ai` | pub.dev | Planned |
 | Flutter | [`flutter_local_ai`](https://vezz.io) | [pub.dev](https://pub.dev/packages/flutter_local_ai) | Published; migration analysis complete |
 | Rust | [`rust_local_ai`](https://vezz.io) | crates.io | API scaffold; no native backend or verified publication |
-| Python | [`python_local_ai`](https://github.com/kekko7072/python_local_ai) | PyPI | Planned; PyO3 bindings over `rust_local_ai` |
+| Python | [`python_local_ai`](https://github.com/kekko7072/python_local_ai) | PyPI | PyO3 bindings over `rust_local_ai` (async and sync API, typed); not published |
 | TypeScript | [`typescript_local_ai`](https://github.com/kekko7072/typescript_local_ai) | npm | Scaffold: core plus `/react`, `/vue`, `/svelte` and `/next` subpaths; not published |
 
 `typescript_local_ai` is one npm package with an entry point per framework:
@@ -131,7 +131,7 @@ stays intact until migration:
 flutter_local_ai/      kekko7072/flutter_local_ai, pinned at v0.2.1
 rust_local_ai/         kekko7072/rust_local_ai, pinned at main
 typescript_local_ai/   kekko7072/typescript_local_ai, pinned at the scaffold
-python_local_ai/       kekko7072/python_local_ai, pinned at main (README only)
+python_local_ai/       kekko7072/python_local_ai, pinned at the bindings
 ```
 
 Clone with `git clone --recurse-submodules`, or run
