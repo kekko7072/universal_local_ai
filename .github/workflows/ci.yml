@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   changes:
-    name: Detect affected packages
+    name: Detect affected submodules
     runs-on: ubuntu-latest
     outputs:
       dart: ${{ steps.filter.outputs.dart }}
@@ -31,17 +31,16 @@ jobs:
         with:
           filters: |
             dart:
+              - 'dart_local_ai'
               - 'flutter_local_ai'
-              - 'packages/dart/**'
               - 'examples/dart/**'
               - 'examples/flutter/**'
             rust:
               - 'rust_local_ai'
-              - 'rust_local_ai/**'
-              - 'packages/rust/**'
               - 'examples/rust/**'
             typescript:
-              - 'packages/typescript/**'
+              - 'typescript_local_ai'
+              - 'next_local_ai'
               - 'examples/typescript/**'
               - 'examples/nextjs/**'
             docs:
@@ -54,6 +53,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: true
       - name: Check required files and package boundaries
         shell: bash
         run: |
@@ -62,17 +63,12 @@ jobs:
             README.md LICENSE CONTRIBUTING.md CODE_OF_CONDUCT.md
             docs/architecture.md docs/api-philosophy.md docs/platforms.md
             docs/roadmap.md docs/projects.md docs/dart-migration.md
-            packages/dart/dart_local_ai/README.md
-            packages/dart/flutter_local_ai/README.md
-            packages/rust/rust_local_ai/README.md
-            packages/typescript/typescript_local_ai/README.md
-            packages/typescript/next_local_ai/README.md
           )
           for path in "${required[@]}"; do
             test -f "$path" || { echo "Missing required file: $path"; exit 1; }
           done
-          if grep -R --line-number --include='pubspec.yaml' \
-            'sdk: flutter' packages/dart/dart_local_ai; then
+          if [ -f dart_local_ai/pubspec.yaml ] && grep --line-number \
+            'sdk: flutter' dart_local_ai/pubspec.yaml; then
             echo 'dart_local_ai must not depend on Flutter.'
             exit 1
           fi

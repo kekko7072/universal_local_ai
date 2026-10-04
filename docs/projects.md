@@ -76,7 +76,8 @@ publishing without explicit authorization.
 5. Make `flutter_local_ai` depend on and re-export the shared package where
    compatible; retain plugin transport, native code, genUI, and facade.
 6. Run old tests plus pure-Dart consumer tests and all native build jobs.
-7. Import history into final paths only after this boundary passes.
+7. Keep each package in its own repository, linked here as a submodule; no
+   history import into this repository is required.
 
 ## `rust_local_ai`
 
@@ -103,14 +104,13 @@ passes. It currently contains no native backend or CI. Consumer examples were
 added concurrently but were not part of this foundation's review.
 
 Migration should first establish whether the concurrent scaffold belongs to
-the standalone repository's history, then preserve that history while placing
-the crate at `packages/rust/rust_local_ai`. Do not copy the scaffold into the
-target directory. Select and implement a real backend before claiming platform
+the standalone repository's history; the crate stays in its own repository,
+linked here as the top-level `rust_local_ai/` submodule. Select and implement a real backend before claiming platform
 support.
 
 ## Planned repositories
 
 No repositories named `dart_local_ai`, `typescript_local_ai`, or
-`next_local_ai` appeared in the inspected GitHub owner inventory. Their
-directories in this foundation are planning boundaries, not packages and not
-registry claims.
+`next_local_ai` appeared in the inspected GitHub owner inventory. Each will be
+created as its own repository and linked here as a top-level submodule; until
+then they are planning names, not packages and not registry claims.

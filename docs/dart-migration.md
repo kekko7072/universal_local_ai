@@ -58,7 +58,7 @@ technology everywhere.
 - `dart create`, `dart pub add dart_local_ai`, and `dart run` work with no
   Flutter SDK dependency in the resolution graph.
 - `flutter pub add flutter_local_ai` is the only install step for Flutter users.
-- No Dart implementation file is duplicated between package directories.
+- No Dart implementation file is duplicated between package repositories.
 - Shared tests run once in `dart_local_ai`; Flutter retains adapter and
   compatibility tests.
 - Existing supported Flutter backends and API behavior do not regress.

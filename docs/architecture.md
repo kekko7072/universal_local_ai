@@ -106,8 +106,6 @@ equivalent to native tool calling or schema-constrained output.
 
 ## Migration and history
 
-Existing repositories remain authoritative until their reviewed import. Git
-history should be retained with `git subtree` or a history-preserving filter
-into the final package path. The exact method should be trialed on a temporary
-branch before changing the monorepo. Tags and release notes remain documented
-even if tags cannot be merged cleanly into one namespace.
+Each package keeps its own repository, history, tags, and release notes. This
+umbrella repository links every package as a top-level git submodule pinned to
+a reviewed commit, so no history import or shared tag namespace is needed.

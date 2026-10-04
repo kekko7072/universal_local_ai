@@ -19,11 +19,9 @@ package releases.
   workspace API scaffold; record that no native backend is implemented.
 - [x] Confirm that Dart, TypeScript, and Next.js repositories do not yet exist
   in the current owner inventory.
-- [ ] Choose and trial a history-preserving import method on a temporary
-  branch.
-- [ ] Record tag and release namespace handling before any import.
-- [ ] Reconcile the top-level Rust scaffold with standalone repository history
-  before moving it to the final package path.
+- [x] Link existing package repositories as top-level git submodules instead
+  of importing their history.
+- [ ] Reconcile the top-level Rust scaffold with standalone repository history.
 
 ## Phase 3 — Dart architecture
 
@@ -34,7 +32,6 @@ package releases.
 - [ ] Make `flutter_local_ai` depend transitively on `dart_local_ai`.
 - [ ] Keep compatibility facades for the published Flutter API.
 - [ ] Validate a plain `dart create` consumer without Flutter installed.
-- [ ] Import Flutter history only after the boundary is proven.
 
 See [Dart migration](dart-migration.md).
 

@@ -102,24 +102,20 @@ until a reviewed import plan says otherwise. See the full
 ## Repository layout
 
 ```text
-packages/       Independently publishable libraries, grouped by ecosystem
-examples/       Consumer examples, separate from package implementation
-docs/           Architecture, support facts, and migration decisions
-.github/        Change-aware validation; publishing is intentionally absent
+flutter_local_ai/   Submodule: kekko7072/flutter_local_ai, pinned at v0.2.1
+rust_local_ai/      Submodule: kekko7072/rust_local_ai API scaffold
+examples/           Consumer examples, separate from package implementation
+docs/               Architecture, support facts, and migration decisions
+.github/            Change-aware validation; publishing is intentionally absent
 ```
 
-Most package directories are foundations only during Phase 1. The standalone
-repositories are linked as git submodules at the top level so their history
-stays intact until migration:
-
-```text
-flutter_local_ai/   kekko7072/flutter_local_ai, pinned at v0.2.1
-rust_local_ai/      kekko7072/rust_local_ai API scaffold
-```
+Every package lives in its own repository and is linked here as a top-level
+git submodule, so each keeps its own history, tags, CI, and releases. Planned
+packages (`dart_local_ai`, `typescript_local_ai`, `next_local_ai`) will be
+added the same way once their repositories exist.
 
 Clone with `git clone --recurse-submodules`, or run
-`git submodule update --init` in an existing checkout. No existing
-implementation has been copied or rewritten as part of this foundation.
+`git submodule update --init` in an existing checkout.
 
 ## Contributing
 
