@@ -4,15 +4,26 @@ Every package is released from **its own repository**, on its own schedule,
 by that repository's release workflow. This umbrella repository never
 publishes. It pins tested combinations and verifies them in CI.
 
-| Package | Registry | Release workflow | Trigger | Credentials |
-|---|---|---|---|---|
-| `flutter_local_ai` | pub.dev | `release-on-merge.yml` → `publish.yml` | merge to `main` with a new pubspec version (auto-tags `v<version>`) | pub.dev automated publishing (OIDC); `RELEASE_TOKEN` to push the tag |
-| `rust_local_ai` | crates.io | `release.yml` | GitHub release `v<version>` | crates.io trusted publishing (OIDC), `CARGO_REGISTRY_TOKEN` fallback |
-| `typescript_local_ai` | npm | `release.yml` | GitHub release `v<version>` | npm Trusted Publishing (OIDC) with provenance; `NPM_TOKEN` only for the first publish |
-| `python_local_ai` | PyPI | `release.yml` | GitHub release `v<version>` | PyPI Trusted Publishing (OIDC) |
+Every package releases the same way: **bump the version and add a
+`## <version>` entry to `CHANGELOG.md`, then merge to `main`.** Its release
+workflow tests the package, publishes it to the registry and creates the
+GitHub release `v<version>`, using that changelog entry as the notes and
+attaching the built artifacts. A merge whose version is already published, or
+already tagged, releases nothing.
 
-Each release workflow refuses a tag that does not match the manifest
-version, and each one can be run manually as a dry run first.
+| Package | Registry | Release workflow | GitHub release assets | Credentials |
+|---|---|---|---|---|
+| `flutter_local_ai` | pub.dev | `release-on-merge.yml` tags `v<version>` → `publish.yml` | notes only (pub.dev hosts the package) | pub.dev automated publishing (OIDC); `RELEASE_TOKEN` to push the tag |
+| `rust_local_ai` | crates.io | `release.yml` | the packaged `.crate` | crates.io trusted publishing (OIDC), `CARGO_REGISTRY_TOKEN` fallback |
+| `typescript_local_ai` | npm | `release.yml` | the `npm pack` tarball | npm Trusted Publishing (OIDC) with provenance; `NPM_TOKEN` only for the first publish |
+| `python_local_ai` | PyPI | `release.yml` | every wheel and the sdist | PyPI Trusted Publishing (OIDC) |
+
+Publishing a GitHub release by hand still works for Rust, Python and
+TypeScript: the package is published and the artifacts are attached to that
+release. Each workflow refuses a tag that does not match the manifest
+version, and a manual run (Actions → Release → Run workflow) is a dry run.
+Adding required reviewers to each publishing environment (`crates-io`,
+`pypi`, `npm`) makes every release wait for your approval.
 
 ## Order for a cross-package change
 
