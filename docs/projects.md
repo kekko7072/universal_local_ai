@@ -82,22 +82,25 @@ and `flutter test` at the pinned commit and never publishes.
 ## `rust_local_ai`
 
 - Repository: `kekko7072/rust_local_ai`, linked as the top-level
-  `rust_local_ai/` git submodule and pinned at `main` (`68d9edc`).
-- Registry: `rust_local_ai` 0.1.0 is listed on crates.io.
+  `rust_local_ai/` git submodule and pinned at `main` (`3abeed1`, the 0.2.0
+  release).
+- Registry: `rust_local_ai` 0.1.0 and 0.2.0 are on crates.io.
 - API: `LocalAiModel`, `LocalAiSession`, backend/session traits,
   capabilities, availability, generation configuration, responses, and typed
   errors. Sessions hold a generation lease that prevents concurrent turns.
-- Backends: according to its README, a Swift C-ABI bridge to Apple
-  Foundation Models implements availability, sessions, text generation,
-  cancellation and token counting (beta, macOS 26.4+ for token counting).
-  Windows, Ubuntu and other Linux providers are planned; other platforms
-  report `unavailable`. The Apple hardware test is opt-in and has not been
-  run as part of this inventory.
+- Backends: according to its README, Apple Foundation Models through a Swift
+  C-ABI bridge (beta), Windows Phi Silica through generated Windows App SDK
+  bindings (beta), Ubuntu inference snaps, and any local OpenAI-compatible
+  server. `LocalAiModel::prepare()` is the only call that may start a model
+  download (Phi Silica). Hardware tests are opt-in and have not been run as
+  part of this inventory.
 - Optional features: `testing` (deterministic `FakeBackend`), `genui`, and
   `a2ui` (generative UI modules and A2UI protocol messages).
 - Downstream: `python_local_ai` binds this crate through PyO3, and the planned
   `@typescript_local_ai/native` addon will bind it for Node.
-- CI and release: the repository has its own CI and release workflows.
+- CI and release: its own CI, and `release.yml` publishing to crates.io on a
+  GitHub release through crates.io trusted publishing (with a token
+  fallback).
 
 ## `typescript_local_ai`
 

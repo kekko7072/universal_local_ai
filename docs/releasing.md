@@ -6,8 +6,8 @@ publishes. It pins tested combinations and verifies them in CI.
 
 | Package | Registry | Release workflow | Trigger | Credentials |
 |---|---|---|---|---|
-| `flutter_local_ai` | pub.dev | `publish.yml`, `release-on-merge.yml` | see that repository | pub.dev automated publishing |
-| `rust_local_ai` | crates.io | `release.yml` | GitHub release `v<version>` | `CARGO_REGISTRY_TOKEN` secret |
+| `flutter_local_ai` | pub.dev | `release-on-merge.yml` → `publish.yml` | merge to `main` with a new pubspec version (auto-tags `v<version>`) | pub.dev automated publishing (OIDC); `RELEASE_TOKEN` to push the tag |
+| `rust_local_ai` | crates.io | `release.yml` | GitHub release `v<version>` | crates.io trusted publishing (OIDC), `CARGO_REGISTRY_TOKEN` fallback |
 | `typescript_local_ai` | npm | `release.yml` | GitHub release `v<version>` | npm Trusted Publishing (OIDC) with provenance; `NPM_TOKEN` only for the first publish |
 | `python_local_ai` | PyPI | `release.yml` | GitHub release `v<version>` | PyPI Trusted Publishing (OIDC) |
 
@@ -20,14 +20,15 @@ Packages depend on each other through pinned versions or revisions, so
 release from the bottom up:
 
 ```text
-rust_local_ai ──► python_local_ai           (git revision in Cargo.toml)
+rust_local_ai ──► python_local_ai           (crates.io version in Cargo.toml)
               └─► @typescript_local_ai/native (planned)
 typescript_local_ai                          (independent)
 flutter_local_ai                             (independent today)
 ```
 
-1. Merge and, if needed, release `rust_local_ai`.
-2. Bump the revision in `python_local_ai/Cargo.toml`, merge, and release.
+1. Merge and release `rust_local_ai` to crates.io.
+2. Bump `rust_local_ai` in `python_local_ai/Cargo.toml` (and `Cargo.lock`),
+   merge, and release.
 3. Release any other package that changed.
 4. In this repository, re-pin each submodule to its released `main` commit
    (`git -C <submodule> checkout <sha>`, then commit the pointer) and update
