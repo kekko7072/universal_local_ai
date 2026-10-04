@@ -5,7 +5,7 @@ existence does not mean Universal Local AI supports it.
 
 ## Implemented today
 
-Only `flutter_local_ai` currently has an implementation. Its repository and
+`flutter_local_ai` has the broadest implementation. Its repository and
 published package report these adapters:
 
 | Platform | Implemented backend | Important qualification |
@@ -18,6 +18,13 @@ published package report these adapters:
 The detailed, version-specific matrix remains in the existing
 `flutter_local_ai` repository until migration. Consumers must query
 `LocalAi.capabilities()` and availability at runtime.
+
+## Rust
+
+`rust_local_ai` reports a beta Apple Foundation Models adapter (availability,
+sessions, text generation, cancellation, and token counting on macOS 26.4+).
+Windows, Ubuntu and other Linux providers are planned and report
+`unavailable` today. See that repository's support matrix for details.
 
 ## TypeScript
 

@@ -43,7 +43,7 @@ not promise backend support that has not been implemented and tested.
 |---|---|---|---|
 | Dart | `dart_local_ai` | pub.dev | Planned |
 | Flutter | [`flutter_local_ai`](https://vezz.io) | [pub.dev](https://pub.dev/packages/flutter_local_ai) | Published; migration analysis complete |
-| Rust | [`rust_local_ai`](https://vezz.io) | crates.io | API scaffold; no native backend or verified publication |
+| Rust | [`rust_local_ai`](https://github.com/kekko7072/rust_local_ai) | [crates.io](https://crates.io/crates/rust_local_ai) | Published 0.1.0; Apple Foundation Models adapter in beta, other OS adapters planned |
 | Python | [`python_local_ai`](https://github.com/kekko7072/python_local_ai) | PyPI | PyO3 bindings over `rust_local_ai` (async and sync API, typed); not published |
 | TypeScript | [`typescript_local_ai`](https://github.com/kekko7072/typescript_local_ai) | npm | Scaffold: core plus `/react`, `/vue`, `/svelte` and `/next` subpaths; not published |
 
@@ -130,8 +130,8 @@ stays intact until migration:
 ```text
 flutter_local_ai/      kekko7072/flutter_local_ai, pinned at v0.2.1
 rust_local_ai/         kekko7072/rust_local_ai, pinned at main
-typescript_local_ai/   kekko7072/typescript_local_ai, pinned at the scaffold
-python_local_ai/       kekko7072/python_local_ai, pinned at the bindings
+typescript_local_ai/   kekko7072/typescript_local_ai, pinned at main
+python_local_ai/       kekko7072/python_local_ai, pinned at the bindings branch
 ```
 
 Clone with `git clone --recurse-submodules`, or run

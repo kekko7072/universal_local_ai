@@ -80,33 +80,27 @@ publishing without explicit authorization.
 
 ## `rust_local_ai`
 
-- Repository: `kekko7072/rust_local_ai`; the initially inspected standalone
-  checkout contained only a heading README and tags `v0.1.1` and `v0.1.2`.
-- Concurrent workspace content: during foundation validation, a top-level
-  `rust_local_ai/` Cargo 0.1.0 scaffold appeared. It is preserved as user-owned
-  work and analyzed here rather than moved or rewritten.
-- API scaffold: `LocalAiModel`, `LocalAiSession`, backend/session traits,
+- Repository: `kekko7072/rust_local_ai`, linked as the top-level
+  `rust_local_ai/` git submodule and pinned at `main` (`68d9edc`).
+- Registry: `rust_local_ai` 0.1.0 is listed on crates.io.
+- API: `LocalAiModel`, `LocalAiSession`, backend/session traits,
   capabilities, availability, generation configuration, responses, and typed
-  errors.
-- Backend behavior: detection currently always returns an unsupported adapter;
-  Apple, Windows, Ubuntu, and Linux enum variants are design vocabulary, not
-  implemented backend claims.
-- Registry status: not verified; manifest metadata and historical tags are not
-  treated as proof of crates.io publication.
+  errors. Sessions hold a generation lease that prevents concurrent turns.
+- Backends: according to its README, a Swift C-ABI bridge to Apple
+  Foundation Models implements availability, sessions, text generation,
+  cancellation and token counting (beta, macOS 26.4+ for token counting).
+  Windows, Ubuntu and other Linux providers are planned; other platforms
+  report `unavailable`. The Apple hardware test is opt-in and has not been
+  run as part of this inventory.
+- Optional features: `testing` (deterministic `FakeBackend`), `genui`, and
+  `a2ui` (generative UI modules and A2UI protocol messages).
+- Downstream: `python_local_ai` binds this crate through PyO3, and the planned
+  `@typescript_local_ai/native` addon will bind it for Node.
+- CI and release: the repository has its own CI and release workflows.
 
-The scaffold has an idiomatic async trait boundary and a session generation
-lease that prevents concurrent turns. A deterministic fake and contract tests
-cover lifecycle, concurrency, capabilities, configuration, cancellation, and
-errors. The inspected suite passes 11 contract tests and one documentation
-test with the `testing` feature; a no-default-features library check also
-passes. It currently contains no native backend or CI. Consumer examples were
-added concurrently but were not part of this foundation's review.
-
-Migration should first establish whether the concurrent scaffold belongs to
-the standalone repository's history, then preserve that history while placing
-the crate at `packages/rust/rust_local_ai`. Do not copy the scaffold into the
-target directory. Select and implement a real backend before claiming platform
-support.
+Migration should preserve the standalone repository's history while placing
+the crate at `packages/rust/rust_local_ai`. Do not copy it into the target
+directory.
 
 ## `typescript_local_ai`
 
