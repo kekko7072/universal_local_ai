@@ -132,7 +132,7 @@ stays intact until migration:
 flutter_local_ai/      kekko7072/flutter_local_ai, pinned at v0.2.1
 rust_local_ai/         kekko7072/rust_local_ai, pinned at main
 typescript_local_ai/   kekko7072/typescript_local_ai, pinned at main
-python_local_ai/       kekko7072/python_local_ai, pinned at the bindings branch
+python_local_ai/       kekko7072/python_local_ai, pinned at main
 ```
 
 Clone with `git clone --recurse-submodules`, or run
