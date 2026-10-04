@@ -23,11 +23,8 @@ package releases.
   submodules.
 - [x] Fold the planned `next_local_ai` package into the
   `typescript_local_ai/next` subpath.
-- [ ] Choose and trial a history-preserving import method on a temporary
-  branch.
-- [ ] Record tag and release namespace handling before any import.
-- [ ] Reconcile the top-level Rust scaffold with standalone repository history
-  before moving it to the final package path.
+- [x] Keep each package in its own repository, linked here as a submodule,
+  instead of importing history into a monorepo `packages/` tree.
 
 ## Phase 3 — Dart architecture
 
@@ -38,7 +35,8 @@ package releases.
 - [ ] Make `flutter_local_ai` depend transitively on `dart_local_ai`.
 - [ ] Keep compatibility facades for the published Flutter API.
 - [ ] Validate a plain `dart create` consumer without Flutter installed.
-- [ ] Import Flutter history only after the boundary is proven.
+- [ ] Create the `kekko7072/dart_local_ai` repository and link it here as a
+  submodule.
 
 See [Dart migration](dart-migration.md).
 
@@ -54,7 +52,9 @@ See [Dart migration](dart-migration.md).
   `rust_local_ai`) for the Node backend.
 - [ ] Add example apps (Vite + React, Next.js, Nuxt, SvelteKit) and build them
   in CI.
-- [ ] Build `python_local_ai` as PyO3 bindings over `rust_local_ai`.
+- [x] Build `python_local_ai` as PyO3 bindings over `rust_local_ai`.
+- [ ] Validate `python_local_ai` against Apple Foundation Models on a
+  configured Mac, then publish wheels to PyPI with explicit authorization.
 - [ ] Evaluate Swift, Kotlin, Go, and React Native from concrete user and
   backend requirements.
 

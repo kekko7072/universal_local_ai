@@ -5,7 +5,7 @@ existence does not mean Universal Local AI supports it.
 
 ## Implemented today
 
-Only `flutter_local_ai` currently has an implementation. Its repository and
+`flutter_local_ai` has the broadest implementation. Its repository and
 published package report these adapters:
 
 | Platform | Implemented backend | Important qualification |
@@ -19,6 +19,20 @@ The detailed, version-specific matrix remains in the existing
 `flutter_local_ai` repository until migration. Consumers must query
 `LocalAi.capabilities()` and availability at runtime.
 
+## Rust
+
+`rust_local_ai` 0.2.0 reports these adapters:
+
+| Platform | Backend | Qualification |
+|---|---|---|
+| macOS | Apple Foundation Models | Beta; macOS 26+ with Apple Intelligence; token counting on 26.4+ |
+| Windows | Phi Silica (Windows App SDK) | Beta; Copilot+ PC or supported GPU, Windows 11 25H2+, and an app with package identity declaring `systemAIModels` |
+| Linux | Ubuntu inference snaps | Uses an installed snap such as `qwen3`; streaming supported |
+| Any | Local OpenAI-compatible server | `openai_compatible()` for llama.cpp, Ollama, LM Studio or Foundry Local; `http://` on this machine only |
+
+"Beta" means built and type-checked in CI but not yet run against a real
+model. See that repository's support matrix for details.
+
 ## TypeScript
 
 | Runtime | Adapter in `typescript_local_ai` | Qualification |
@@ -30,9 +44,18 @@ The detailed, version-specific matrix remains in the existing
 React, Vue, Svelte and Next.js are supported as framework integrations
 (entry points of the same package), not as separate backends.
 
-## Not yet implemented in this monorepo
+## Python
 
-`dart_local_ai` and `python_local_ai` do not yet claim a backend here. Apple,
+`python_local_ai` binds `rust_local_ai` and adds no backend of its own, so its
+support is exactly the Rust table above. CI tests it against the fake backend
+and, end to end, against the OpenAI-compatible backend with a local test
+server. The Apple, Windows and inference-snap paths haven't yet been run from
+Python on real hardware. A plain `python.exe` has no package identity, so on
+Windows Phi Silica reports `provider_not_installed`.
+
+## Not yet implemented
+
+`dart_local_ai` does not yet claim a backend here. Apple,
 Windows, Android, Linux, and browser integrations for those packages are
 roadmap candidates, not support promises.
 
