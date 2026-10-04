@@ -150,18 +150,27 @@ jobs:
       - name: Build the bindings against the rust_local_ai submodule
         working-directory: python_local_ai
         run: |
-          # Override the git dependency with the submodule so this checks the
-          # exact pair pinned here, not the revision in python_local_ai's lock.
+          # Override python_local_ai's rust_local_ai dependency with the
+          # submodule, so this checks the exact pair pinned here. Patch the
+          # source Cargo.toml actually uses: a git revision or crates.io.
+          if grep -q 'git = "https://github.com/kekko7072/rust_local_ai"' Cargo.toml; then
+            dep_source='"https://github.com/kekko7072/rust_local_ai"'
+          else
+            dep_source='crates-io'
+          fi
           mkdir -p .cargo
-          cat > .cargo/config.toml <<'TOML'
-          [patch."https://github.com/kekko7072/rust_local_ai"]
-          rust_local_ai = { path = "../rust_local_ai" }
-          TOML
+          printf '[patch.%s]\nrust_local_ai = { path = "../rust_local_ai" }\n' "$dep_source" > .cargo/config.toml
+          cat .cargo/config.toml
           python -m venv .venv
           if [ -f .venv/Scripts/activate ]; then source .venv/Scripts/activate; else source .venv/bin/activate; fi
           python -m pip install --upgrade pip
           python -m pip install maturin pytest mypy typing_extensions
-          maturin develop
+          maturin develop 2>&1 | tee build.log
+          # Cargo only warns when a patch does not apply; make that an error.
+          if grep -q "was not used in the crate graph" build.log; then
+            echo "::error::The rust_local_ai submodule patch was not applied"
+            exit 1
+          fi
           python -m pytest
           python -m mypy.stubtest python_local_ai._native
           python examples/basic.py

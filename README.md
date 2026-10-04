@@ -124,7 +124,7 @@ level and pins a tested combination:
 flutter_local_ai/      kekko7072/flutter_local_ai, pinned at v0.2.1
 rust_local_ai/         kekko7072/rust_local_ai, pinned at main
 typescript_local_ai/   kekko7072/typescript_local_ai, pinned at main
-python_local_ai/       kekko7072/python_local_ai, pinned at main
+python_local_ai/       kekko7072/python_local_ai, pinned at the rust 0.2 branch
 examples/              Consumer examples, separate from package implementation
 docs/                  Architecture, support facts, and release process
 .github/               Validation of the pinned packages; never publishes
