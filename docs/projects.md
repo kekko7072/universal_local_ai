@@ -136,7 +136,9 @@ directory.
 - Validation: pytest and doctests against the fake backend, `stubtest`,
   `mypy --strict`, rustfmt and clippy. CI runs on Linux, macOS and Windows
   with Python 3.9 and 3.13 and builds wheel and sdist artifacts.
-- Registry: not published.
+- Registry: not yet on PyPI; the repository has a Trusted Publishing release
+  workflow (abi3 wheels for Linux, macOS and Windows plus an sdist) waiting
+  for the PyPI publisher to be configured.
 
 ## Planned repositories
 
