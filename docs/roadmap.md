@@ -19,6 +19,10 @@ package releases.
   workspace API scaffold; record that no native backend is implemented.
 - [x] Confirm that Dart, TypeScript, and Next.js repositories do not yet exist
   in the current owner inventory.
+- [x] Create `typescript_local_ai` and `python_local_ai` and link them as
+  submodules.
+- [x] Fold the planned `next_local_ai` package into the
+  `typescript_local_ai/next` subpath.
 - [ ] Choose and trial a history-preserving import method on a temporary
   branch.
 - [ ] Record tag and release namespace handling before any import.
@@ -41,11 +45,18 @@ See [Dart migration](dart-migration.md).
 ## Phase 4 — Other ecosystems
 
 - [ ] Define an idiomatic Rust API after the first backend is selected.
-- [ ] Build the framework-neutral TypeScript package around an implemented
-  runtime.
-- [ ] Add a thin Next.js integration only for framework-specific concerns.
-- [ ] Evaluate Swift, Kotlin, Python, Go, and React Native from concrete user
-  and backend requirements.
+- [x] Scaffold the framework-neutral TypeScript package with a Chrome Prompt
+  API adapter.
+- [x] Add thin React, Vue, Svelte and Next.js (server) adapters as subpaths
+  of the same package.
+- [ ] Validate the Prompt API adapter in a real Chrome build.
+- [ ] Build and publish `@typescript_local_ai/native` (napi-rs over
+  `rust_local_ai`) for the Node backend.
+- [ ] Add example apps (Vite + React, Next.js, Nuxt, SvelteKit) and build them
+  in CI.
+- [ ] Build `python_local_ai` as PyO3 bindings over `rust_local_ai`.
+- [ ] Evaluate Swift, Kotlin, Go, and React Native from concrete user and
+  backend requirements.
 
 ## CI growth
 

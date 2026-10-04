@@ -108,9 +108,32 @@ the crate at `packages/rust/rust_local_ai`. Do not copy the scaffold into the
 target directory. Select and implement a real backend before claiming platform
 support.
 
+## `typescript_local_ai`
+
+- Repository: `kekko7072/typescript_local_ai`, linked as the top-level
+  `typescript_local_ai/` git submodule.
+- Shape: one ESM npm package with the subpaths `.` (browser / node export
+  conditions), `/react`, `/vue`, `/svelte`, `/next` and `/testing`. React,
+  Vue, Svelte and Next.js are optional peer dependencies.
+- Backends: a Chrome Prompt API adapter, and a Node adapter for the planned
+  `@typescript_local_ai/native` napi-rs addon over `rust_local_ai`. The addon
+  does not exist yet.
+- Validation: typecheck, Vitest unit tests (core, both backends, every
+  adapter, SSR rendering for React and Vue), tsup build, publint, and smoke
+  imports of every built subpath on Node 20, 22 and 24.
+- Registry: not published.
+- Replaces the previously planned `next_local_ai` package with the
+  `typescript_local_ai/next` subpath.
+
+## `python_local_ai`
+
+- Repository: `kekko7072/python_local_ai`, linked as the top-level
+  `python_local_ai/` git submodule. It contains only a README.
+- Plan: PyO3 bindings over `rust_local_ai`, published to PyPI. No
+  implementation and no registry claim.
+
 ## Planned repositories
 
-No repositories named `dart_local_ai`, `typescript_local_ai`, or
-`next_local_ai` appeared in the inspected GitHub owner inventory. Their
-directories in this foundation are planning boundaries, not packages and not
-registry claims.
+No repository named `dart_local_ai` appeared in the inspected GitHub owner
+inventory. Its directory in this foundation is a planning boundary, not a
+package and not a registry claim.

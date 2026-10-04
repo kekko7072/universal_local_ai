@@ -16,21 +16,21 @@ idiomatic library for your ecosystem.
 ```text
                  Universal Local AI
 
-     Dart       Flutter       Rust
-       │           │            │
-       └──────┬────┴─────┬──────┘
-              │          │
-          TypeScript   Next.js
-              │          │
-              └────┬─────┘
-                   │
-              Local AI Layer
-                   │
-       ┌───────────┼───────────┐
-       │           │           │
-     Apple      Windows      Other
-  Foundation    Local AI     Native
-    Models                    AI
+     Dart      Flutter      Rust      Python
+       │          │          │          │
+       └─────┬────┘          └────┬─────┘
+             │                    │
+             │   TypeScript (React · Vue · Svelte · Next.js)
+             │                    │
+             └─────────┬──────────┘
+                       │
+                    Local AI Layer
+                       │
+           ┌───────────┼───────────┐
+           │           │           │
+         Apple      Windows      Other
+      Foundation    Local AI     Native
+        Models                    AI
 ```
 
 ## Projects
@@ -44,13 +44,21 @@ not promise backend support that has not been implemented and tested.
 | Dart | `dart_local_ai` | pub.dev | Planned |
 | Flutter | [`flutter_local_ai`](https://vezz.io) | [pub.dev](https://pub.dev/packages/flutter_local_ai) | Published; migration analysis complete |
 | Rust | [`rust_local_ai`](https://vezz.io) | crates.io | API scaffold; no native backend or verified publication |
-| TypeScript | `typescript_local_ai` | npm | Planned |
-| Next.js | `next_local_ai` | npm | Planned |
+| Python | [`python_local_ai`](https://github.com/kekko7072/python_local_ai) | PyPI | Planned; PyO3 bindings over `rust_local_ai` |
+| TypeScript | [`typescript_local_ai`](https://github.com/kekko7072/typescript_local_ai) | npm | Scaffold: core plus `/react`, `/vue`, `/svelte` and `/next` subpaths; not published |
+
+`typescript_local_ai` is one npm package with an entry point per framework:
+plain TypeScript, React (including Next.js client components), Vue, Svelte,
+and `typescript_local_ai/next` for Next.js server route handlers. The
+frameworks are optional peer dependencies, so each app pulls in only its own.
+The separate `next_local_ai` package is no longer planned; the `/next` subpath
+replaces it.
 
 The Flutter package currently implements Apple Foundation Models, Android ML
 Kit GenAI, Windows AI Foundry, and Chrome's Prompt API with different verified
-capabilities on each platform. See [platforms](docs/platforms.md) for the
-careful support matrix. No backend is attributed to the other packages yet.
+capabilities on each platform. `typescript_local_ai` has a unit-tested Chrome
+Prompt API adapter, and a Node adapter that waits for the unpublished native
+addon. See [platforms](docs/platforms.md) for the careful support matrix.
 
 ## One ecosystem, four principles
 
@@ -83,15 +91,22 @@ can evolve and release independently, with their own idiomatic APIs.
 Share code only where it is genuinely natural:
 
 ```text
-dart_local_ai                  typescript_local_ai
-      ↑                                ↑
-flutter_local_ai                    next_local_ai
+dart_local_ai             rust_local_ai ──────────────┐
+      ↑                         ↑                     │ napi-rs (Node)
+flutter_local_ai          python_local_ai (PyO3)      ↓
+                                              typescript_local_ai
+                                               ├── /react
+                                               ├── /vue
+                                               ├── /svelte
+                                               └── /next
 ```
 
 Pure Dart concepts and host-neutral behavior belong in `dart_local_ai`.
 `flutter_local_ai` will depend on it transitively and retain only Flutter
-integration and plugin packaging. The TypeScript/Next.js relationship follows
-the same rule where runtime boundaries allow it. Rust stays idiomatic Rust.
+integration and plugin packaging. In TypeScript, one framework-neutral core
+owns the behavior; the React, Vue, Svelte and Next.js subpaths are thin
+adapters over it inside the same package. Rust stays idiomatic Rust and is the
+native core for the Python bindings and the Node backend.
 
 The migration is incremental. Existing repositories, public APIs, histories,
 tests, examples, release metadata, licenses, and CI behavior are preserved
@@ -113,8 +128,10 @@ repositories are linked as git submodules at the top level so their history
 stays intact until migration:
 
 ```text
-flutter_local_ai/   kekko7072/flutter_local_ai, pinned at v0.2.1
-rust_local_ai/      kekko7072/rust_local_ai API scaffold
+flutter_local_ai/      kekko7072/flutter_local_ai, pinned at v0.2.1
+rust_local_ai/         kekko7072/rust_local_ai, pinned at main
+typescript_local_ai/   kekko7072/typescript_local_ai, pinned at the scaffold
+python_local_ai/       kekko7072/python_local_ai, pinned at main (README only)
 ```
 
 Clone with `git clone --recurse-submodules`, or run
