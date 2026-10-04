@@ -43,5 +43,6 @@ traceable to an implementation, test, registry, or upstream project.
 - Include migration notes for public API changes.
 - Do not include generated build output or credentials.
 
-Publishing is a separate, explicitly authorized operation. Merging a pull
+Publishing is a separate, explicitly authorized operation that runs in each
+package's own repository; see [docs/releasing.md](docs/releasing.md). Merging a pull
 request in this umbrella repository must not publish a package.

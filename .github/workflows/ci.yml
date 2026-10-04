@@ -1,5 +1,13 @@
 name: CI
 
+# Umbrella CI. Each package keeps its own CI and release workflow in its own
+# repository; this workflow validates the combination pinned here:
+#   - every submodule pin exists upstream and is merged into its default branch
+#   - each affected package's checks pass at the pinned commit
+#   - python_local_ai builds against the pinned rust_local_ai submodule
+# Mark the "CI result" job as the required status check for main.
+# This workflow never publishes.
+
 on:
   pull_request:
   push:
@@ -18,11 +26,10 @@ jobs:
     name: Detect affected packages
     runs-on: ubuntu-latest
     outputs:
-      dart: ${{ steps.filter.outputs.dart }}
-      rust: ${{ steps.filter.outputs.rust }}
-      typescript: ${{ steps.filter.outputs.typescript }}
-      python: ${{ steps.filter.outputs.python }}
-      docs: ${{ steps.filter.outputs.docs }}
+      dart: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.dart == 'true' }}
+      rust: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.rust == 'true' }}
+      typescript: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.typescript == 'true' }}
+      python: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.python == 'true' || steps.filter.outputs.rust == 'true' }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -31,31 +38,30 @@ jobs:
         id: filter
         with:
           filters: |
+            ci: &ci
+              - '.github/workflows/ci.yml'
             dart:
+              - *ci
               - 'flutter_local_ai'
               - 'packages/dart/**'
               - 'examples/dart/**'
               - 'examples/flutter/**'
             rust:
+              - *ci
               - 'rust_local_ai'
-              - 'rust_local_ai/**'
               - 'packages/rust/**'
               - 'examples/rust/**'
             typescript:
+              - *ci
               - 'typescript_local_ai'
-              - 'typescript_local_ai/**'
               - 'packages/typescript/**'
               - 'examples/typescript/**'
               - 'examples/nextjs/**'
             python:
+              - *ci
               - 'python_local_ai'
-              - 'python_local_ai/**'
               - 'packages/python/**'
               - 'examples/python/**'
-            docs:
-              - '**/*.md'
-              - 'LICENSE'
-              - '.github/**'
 
   foundation:
     name: Validate foundation
@@ -69,7 +75,7 @@ jobs:
           required=(
             README.md LICENSE CONTRIBUTING.md CODE_OF_CONDUCT.md
             docs/architecture.md docs/api-philosophy.md docs/platforms.md
-            docs/roadmap.md docs/projects.md docs/dart-migration.md
+            docs/roadmap.md docs/projects.md docs/dart-migration.md docs/releasing.md
             packages/dart/dart_local_ai/README.md
             packages/dart/flutter_local_ai/README.md
             packages/rust/rust_local_ai/README.md
@@ -94,28 +100,153 @@ jobs:
             exit 1
           fi
 
-  package-plan:
-    name: Report affected package checks
-    needs: changes
+  submodules:
+    name: Submodule pins
     runs-on: ubuntu-latest
     steps:
-      - name: Summarize selection
-        env:
-          DART_CHANGED: ${{ needs.changes.outputs.dart }}
-          RUST_CHANGED: ${{ needs.changes.outputs.rust }}
-          TYPESCRIPT_CHANGED: ${{ needs.changes.outputs.typescript }}
-          PYTHON_CHANGED: ${{ needs.changes.outputs.python }}
-          DOCS_CHANGED: ${{ needs.changes.outputs.docs }}
+      - uses: actions/checkout@v4
+      - name: Every pin exists upstream and is merged into its default branch
         run: |
           {
-            echo '## Affected areas'
-            echo "- Dart / Flutter: $DART_CHANGED"
-            echo "- Rust: $RUST_CHANGED"
-            echo "- TypeScript (core, React, Vue, Svelte, Next.js): $TYPESCRIPT_CHANGED"
-            echo "- Python: $PYTHON_CHANGED"
-            echo "- Foundation / docs: $DOCS_CHANGED"
+            echo '## Submodule pins'
             echo
-            echo 'Package-specific format, lint, test, native build, example,'
-            echo 'and publication dry-run jobs will activate as manifests are imported.'
-            echo 'This workflow never publishes.'
+            echo '| Submodule | Pin | Upstream | Freshness |'
+            echo '|---|---|---|---|'
           } >> "$GITHUB_STEP_SUMMARY"
+          # Pull requests and manual runs may pin a commit whose upstream PR is
+          # still open (warning); main must only pin merged commits (error).
+          if [ "${{ github.event_name }}" = "push" ]; then
+            bash .github/scripts/check-submodule-pins.sh --strict
+          else
+            bash .github/scripts/check-submodule-pins.sh
+          fi
+
+  rust:
+    name: rust_local_ai (${{ matrix.os }})
+    needs: changes
+    if: needs.changes.outputs.rust == 'true'
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - run: git submodule update --init --depth 1 rust_local_ai
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Test at the pinned commit
+        working-directory: rust_local_ai
+        run: cargo test --locked --all-features
+      - name: Library builds without optional features
+        working-directory: rust_local_ai
+        run: cargo check --locked --no-default-features
+
+  python:
+    name: python_local_ai on pinned rust_local_ai (${{ matrix.os }})
+    needs: changes
+    if: needs.changes.outputs.python == 'true'
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - run: git submodule update --init --depth 1 python_local_ai rust_local_ai
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build the bindings against the rust_local_ai submodule
+        working-directory: python_local_ai
+        run: |
+          # Override the git dependency with the submodule so this checks the
+          # exact pair pinned here, not the revision in python_local_ai's lock.
+          mkdir -p .cargo
+          cat > .cargo/config.toml <<'TOML'
+          [patch."https://github.com/kekko7072/rust_local_ai"]
+          rust_local_ai = { path = "../rust_local_ai" }
+          TOML
+          python -m venv .venv
+          if [ -f .venv/Scripts/activate ]; then source .venv/Scripts/activate; else source .venv/bin/activate; fi
+          python -m pip install --upgrade pip
+          python -m pip install maturin pytest mypy typing_extensions
+          maturin develop
+          python -m pytest
+          python -m mypy.stubtest python_local_ai._native
+          python examples/basic.py
+
+  typescript:
+    name: typescript_local_ai (Node ${{ matrix.node }})
+    needs: changes
+    if: needs.changes.outputs.typescript == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [20, 24]
+    steps:
+      - uses: actions/checkout@v4
+      - run: git submodule update --init --depth 1 typescript_local_ai
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Typecheck, test, build, package lint and smoke imports
+        working-directory: typescript_local_ai
+        run: |
+          npm ci
+          npm run check
+          npm pack --dry-run
+
+  flutter:
+    name: flutter_local_ai
+    needs: changes
+    if: needs.changes.outputs.dart == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: git submodule update --init --depth 1 flutter_local_ai
+      - uses: subosito/flutter-action@v2
+        with:
+          # Keep in step with FLUTTER_PINNED in flutter_local_ai's own CI.
+          flutter-version: "3.44.x"
+          channel: stable
+          cache: true
+      - name: Analyze and test at the pinned commit
+        working-directory: flutter_local_ai
+        run: |
+          flutter pub get
+          flutter analyze
+          flutter test
+
+  release-status:
+    name: Release status
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: git submodule update --init --depth 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Compare pinned versions with npm, PyPI, crates.io and pub.dev
+        run: python .github/scripts/release-status.py
+
+  result:
+    name: CI result
+    if: always()
+    needs: [changes, foundation, submodules, rust, python, typescript, flutter]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail if any required job failed or was cancelled
+        env:
+          RESULTS: ${{ toJSON(needs.*.result) }}
+        run: |
+          echo "$RESULTS"
+          if echo "$RESULTS" | grep -Eq '"(failure|cancelled)"'; then
+            echo "::error::At least one CI job failed or was cancelled"
+            exit 1
+          fi

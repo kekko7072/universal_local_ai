@@ -112,7 +112,8 @@ The migration is incremental. Existing repositories, public APIs, histories,
 tests, examples, release metadata, licenses, and CI behavior are preserved
 until a reviewed import plan says otherwise. See the full
 [architecture](docs/architecture.md), [API philosophy](docs/api-philosophy.md),
-[project inventory](docs/projects.md), and [roadmap](docs/roadmap.md).
+[project inventory](docs/projects.md), [releasing](docs/releasing.md), and
+[roadmap](docs/roadmap.md).
 
 ## Repository layout
 
@@ -120,7 +121,7 @@ until a reviewed import plan says otherwise. See the full
 packages/       Independently publishable libraries, grouped by ecosystem
 examples/       Consumer examples, separate from package implementation
 docs/           Architecture, support facts, and migration decisions
-.github/        Change-aware validation; publishing is intentionally absent
+.github/        Change-aware validation of pinned packages; never publishes
 ```
 
 Most package directories are foundations only during Phase 1. The standalone
