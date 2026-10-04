@@ -4,3 +4,9 @@
 [submodule "flutter_local_ai"]
 	path = flutter_local_ai
 	url = https://github.com/kekko7072/flutter_local_ai.git
+[submodule "typescript_local_ai"]
+	path = typescript_local_ai
+	url = https://github.com/kekko7072/typescript_local_ai.git
+[submodule "python_local_ai"]
+	path = python_local_ai
+	url = https://github.com/kekko7072/python_local_ai.git

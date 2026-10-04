@@ -21,6 +21,7 @@ jobs:
       dart: ${{ steps.filter.outputs.dart }}
       rust: ${{ steps.filter.outputs.rust }}
       typescript: ${{ steps.filter.outputs.typescript }}
+      python: ${{ steps.filter.outputs.python }}
       docs: ${{ steps.filter.outputs.docs }}
     steps:
       - uses: actions/checkout@v4
@@ -41,9 +42,16 @@ jobs:
               - 'packages/rust/**'
               - 'examples/rust/**'
             typescript:
+              - 'typescript_local_ai'
+              - 'typescript_local_ai/**'
               - 'packages/typescript/**'
               - 'examples/typescript/**'
               - 'examples/nextjs/**'
+            python:
+              - 'python_local_ai'
+              - 'python_local_ai/**'
+              - 'packages/python/**'
+              - 'examples/python/**'
             docs:
               - '**/*.md'
               - 'LICENSE'
@@ -66,11 +74,20 @@ jobs:
             packages/dart/flutter_local_ai/README.md
             packages/rust/rust_local_ai/README.md
             packages/typescript/typescript_local_ai/README.md
-            packages/typescript/next_local_ai/README.md
+            packages/python/python_local_ai/README.md
+            .gitmodules
           )
           for path in "${required[@]}"; do
             test -f "$path" || { echo "Missing required file: $path"; exit 1; }
           done
+          for submodule in flutter_local_ai rust_local_ai typescript_local_ai python_local_ai; do
+            git config --file .gitmodules --get "submodule.$submodule.url" >/dev/null \
+              || { echo "Missing submodule entry: $submodule"; exit 1; }
+          done
+          if test -d packages/typescript/next_local_ai; then
+            echo 'next_local_ai is replaced by the typescript_local_ai/next subpath.'
+            exit 1
+          fi
           if grep -R --line-number --include='pubspec.yaml' \
             'sdk: flutter' packages/dart/dart_local_ai; then
             echo 'dart_local_ai must not depend on Flutter.'
@@ -87,13 +104,15 @@ jobs:
           DART_CHANGED: ${{ needs.changes.outputs.dart }}
           RUST_CHANGED: ${{ needs.changes.outputs.rust }}
           TYPESCRIPT_CHANGED: ${{ needs.changes.outputs.typescript }}
+          PYTHON_CHANGED: ${{ needs.changes.outputs.python }}
           DOCS_CHANGED: ${{ needs.changes.outputs.docs }}
         run: |
           {
             echo '## Affected areas'
             echo "- Dart / Flutter: $DART_CHANGED"
             echo "- Rust: $RUST_CHANGED"
-            echo "- TypeScript / Next.js: $TYPESCRIPT_CHANGED"
+            echo "- TypeScript (core, React, Vue, Svelte, Next.js): $TYPESCRIPT_CHANGED"
+            echo "- Python: $PYTHON_CHANGED"
             echo "- Foundation / docs: $DOCS_CHANGED"
             echo
             echo 'Package-specific format, lint, test, native build, example,'

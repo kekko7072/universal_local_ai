@@ -62,12 +62,27 @@ The current Flutter implementation already has a useful internal seam:
 and browser hosts. Phase 3 turns that seam into package ownership without
 copying files. Details are in [Dart migration](dart-migration.md).
 
-### TypeScript and Next.js
+### TypeScript and its frameworks
 
-Framework-neutral contracts, browser/runtime adapters, validation, and tests
-belong in `typescript_local_ai`. `next_local_ai` should add only Next.js-aware
-entry points such as runtime selection or framework integration. Server,
-browser, and edge runtimes must not be falsely treated as interchangeable.
+`typescript_local_ai` is one npm package. Its framework-neutral core (the
+contracts, the `LocalAiController` state machine, the backend adapters and
+validation) is written once, and each framework gets a thin subpath over it:
+
+```text
+typescript_local_ai            core; browser → Prompt API, node → native addon
+typescript_local_ai/react      useLocalAi() hook, shipped with "use client"
+typescript_local_ai/vue        useLocalAi() composable
+typescript_local_ai/svelte     localAi() store (Svelte 4 and 5)
+typescript_local_ai/next       Next.js route handlers, guarded by server-only
+typescript_local_ai/testing    deterministic FakeBackend
+```
+
+The frameworks are optional peer dependencies. Adapters import the core
+through the package name, so every subpath shares a single copy of it. Server,
+browser and edge runtimes are selected with export conditions and are never
+treated as interchangeable. Adapters never probe availability during server
+rendering. If an adapter grows enough to need its own release cadence, it can
+move to a scoped package, and the old subpath can keep re-exporting it.
 
 ### Rust
 

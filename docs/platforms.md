@@ -19,11 +19,22 @@ The detailed, version-specific matrix remains in the existing
 `flutter_local_ai` repository until migration. Consumers must query
 `LocalAi.capabilities()` and availability at runtime.
 
+## TypeScript
+
+| Runtime | Adapter in `typescript_local_ai` | Qualification |
+|---|---|---|
+| Browser | Chrome Prompt API (`LanguageModel`) | Unit-tested against a simulated `LanguageModel`; not yet validated in a real Chrome build. Streaming and model download are bridged. Structured output and image input are not exposed, and the adapter reports them as unsupported. |
+| Node.js | `@typescript_local_ai/native` (napi-rs over `rust_local_ai`) | The adapter and its contract exist, but the addon is not built or published, so Node reports `unavailable`. |
+| Edge runtimes | none | Reports `unavailable`. |
+
+React, Vue, Svelte and Next.js are supported as framework integrations
+(entry points of the same package), not as separate backends.
+
 ## Not yet implemented in this monorepo
 
-`dart_local_ai`, `rust_local_ai`, `typescript_local_ai`, and `next_local_ai` do
-not yet claim a backend here. Apple, Windows, Android, Linux, and browser
-integrations for those packages are roadmap candidates, not support promises.
+`dart_local_ai` and `python_local_ai` do not yet claim a backend here. Apple,
+Windows, Android, Linux, and browser integrations for those packages are
+roadmap candidates, not support promises.
 
 ## Criteria for adding a backend
 

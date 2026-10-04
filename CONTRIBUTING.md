@@ -15,8 +15,9 @@ Thank you for helping make native, local AI accessible from more ecosystems.
 
 - Put reusable, Flutter-independent Dart code in `dart_local_ai`; Flutter code
   depends on it, never the reverse.
-- Put reusable, framework-independent TypeScript code in
-  `typescript_local_ai`; Next.js integration depends on it where appropriate.
+- Put reusable, framework-independent TypeScript code in the
+  `typescript_local_ai` core. The React, Vue, Svelte and Next.js subpaths stay
+  thin adapters over it and never keep a second copy of behavior.
 - Prefer each language's conventions over mechanically identical APIs.
 - Add abstractions in response to demonstrated implementations, not imagined
   future needs.
