@@ -36,16 +36,16 @@ idiomatic library for your ecosystem.
 ## Projects
 
 Every package remains independently versioned and publishable. Statuses below
-describe verified repository and registry state as of 4 October 2026; they do
+describe verified repository and registry state as of 11 October 2026; they do
 not promise backend support that has not been implemented and tested.
 
 | Ecosystem | Package | Registry | Status |
 |---|---|---|---|
 | Dart | `dart_local_ai` | pub.dev | Planned |
-| Flutter | [`flutter_local_ai`](https://vezz.io) | [pub.dev](https://pub.dev/packages/flutter_local_ai) | Published; migration analysis complete |
-| Rust | [`rust_local_ai`](https://github.com/kekko7072/rust_local_ai) | [crates.io](https://crates.io/crates/rust_local_ai) | Published 0.2.0; Apple Foundation Models and Windows Phi Silica (beta), Ubuntu inference snaps, local OpenAI-compatible servers |
-| Python | [`python_local_ai`](https://github.com/kekko7072/python_local_ai) | PyPI | PyO3 bindings over `rust_local_ai` (async and sync API, typed); release workflow ready, not yet published |
-| TypeScript | [`typescript_local_ai`](https://github.com/kekko7072/typescript_local_ai) | npm | Scaffold: core plus `/react`, `/vue`, `/svelte` and `/next` subpaths; not published |
+| Flutter | [`flutter_local_ai`](https://github.com/kekko7072/flutter_local_ai) | [pub.dev](https://pub.dev/packages/flutter_local_ai) | Published 0.2.1; automatic pub.dev and GitHub releases |
+| Rust | [`rust_local_ai`](https://github.com/kekko7072/rust_local_ai) | [crates.io](https://crates.io/crates/rust_local_ai) | Published 0.2.1; Apple Foundation Models and Windows Phi Silica (beta), Ubuntu inference snaps, local OpenAI-compatible servers |
+| Python | [`python_local_ai`](https://github.com/kekko7072/python_local_ai) | [PyPI](https://pypi.org/project/python-local-ai/) | Published 0.1.1; typed async and sync PyO3 bindings over `rust_local_ai` 0.2.1 |
+| TypeScript | [`typescript_local_ai`](https://github.com/kekko7072/typescript_local_ai) | npm | 0.1.0 release prepared with core plus `/react`, `/vue`, `/svelte` and `/next` subpaths; initial npm publication pending |
 
 `typescript_local_ai` is one npm package with an entry point per framework:
 plain TypeScript, React (including Next.js client components), Vue, Svelte,
