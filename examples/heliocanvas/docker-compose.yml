@@ -1,0 +1,50 @@
+name: heliocanvas
+
+services:
+  mosquitto:
+    image: eclipse-mosquitto:2.0
+    restart: unless-stopped
+    volumes:
+      - ./config/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+      - mqtt-data:/mosquitto/data
+    networks: [solar]
+  grott:
+    image: ledidobe/grott:2.8.3
+    restart: unless-stopped
+    depends_on: [mosquitto]
+    ports:
+      - "${GROTT_PORT:-5279}:5279"
+    volumes:
+      - ./config/grott.ini:/app/grott.ini:ro
+    networks: [solar]
+  api:
+    build: ./backend
+    restart: unless-stopped
+    depends_on: [mosquitto]
+    environment:
+      MQTT_HOST: mosquitto
+      MQTT_TOPIC: energy/growatt/#
+      DB_PATH: /data/solar.db
+      OLLAMA_URL: ${OLLAMA_URL:-http://host.docker.internal:11434}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-gemma3:1b}
+      MOCK_DATA: ${MOCK_DATA:-true}
+      PLANT_NAME: ${PLANT_NAME:-My solar plant}
+      RATED_POWER_KW: ${RATED_POWER_KW:-0}
+      LOGGER_MODEL: ${LOGGER_MODEL:-ShineWiFi-X}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - telemetry-data:/data
+    networks: [solar]
+  web:
+    build: .
+    restart: unless-stopped
+    depends_on: [api]
+    ports:
+      - "${DASHBOARD_PORT:-8080}:80"
+    networks: [solar]
+networks:
+  solar:
+volumes:
+  mqtt-data:
+  telemetry-data:

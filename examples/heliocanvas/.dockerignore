@@ -1,0 +1,13 @@
+.git
+.dart_tool
+.env
+.flutter-plugins*
+.idea
+build
+coverage
+android
+ios
+test
+backend/__pycache__
+*.iml
+*.log

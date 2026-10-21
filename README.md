@@ -130,6 +130,14 @@ docs/                  Architecture, support facts, and release process
 .github/               Validation of the pinned packages; never publishes
 ```
 
+## Showcase example
+
+[HelioCanvas](examples/heliocanvas) is a runnable local-first solar telemetry
+dashboard and GenUI showcase. It combines Flutter Web, `flutter_local_ai`, a
+local Ollama fallback for Chrome, Grott, MQTT, FastAPI, SQLite, and Docker
+Compose. It starts with mock Growatt data and includes a documented path for a
+real ShineWiFi-X logger.
+
 A new package (for example `dart_local_ai`) gets its own repository first and
 is then added here with `git submodule add`.
 
