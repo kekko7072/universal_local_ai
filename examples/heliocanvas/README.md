@@ -29,6 +29,14 @@ Run the one-command setup:
 
 It creates the ignored machine-local `.env`, detects the server's LAN address when possible, starts the complete stack, and downloads the configured local Ollama model once. No Growatt login, plant name, serial number, Wi-Fi password, or cloud API key is required.
 
+To run the complete telemetry dashboard without downloading or starting Local AI:
+
+```bash
+./setup.sh --no-local-ai
+```
+
+This removes a previously started Ollama container from the running stack while preserving its model volume for later reuse. Run `./setup.sh --with-local-ai` to enable it again. Without Ollama, **Design UI** uses the deterministic offline fallback.
+
 Real identifiers received from the logger exist only in the local SQLite volume and UI. They are never added to the repository or sent to an AI cloud. Edit `.env` to change the generic plant label, rated power, ports, mock behavior, or model, then rerun `./setup.sh`.
 
 For a full ecosystem checkout, use `git clone --recurse-submodules` instead.
