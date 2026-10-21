@@ -49,6 +49,13 @@ class Telemetry {
     required this.total,
     required this.temp,
     required this.voltage,
+    required this.batterySoc,
+    required this.batteryCharge,
+    required this.batteryDischarge,
+    required this.batteryVoltage,
+    required this.homeLoad,
+    required this.gridImport,
+    required this.gridExport,
     required this.history,
     this.demo = false,
   });
@@ -58,9 +65,12 @@ class Telemetry {
   final bool online, demo;
   final DateTime updated;
   final double watts, today, total, temp, voltage;
+  final double? batterySoc, batteryCharge, batteryDischarge, batteryVoltage;
+  final double? homeLoad, gridImport, gridExport;
   final List<Sample> history;
   factory Telemetry.fromJson(Map<String, dynamic> j) {
     double n(String k) => (j[k] as num?)?.toDouble() ?? 0;
+    double? optional(String k) => (j[k] as num?)?.toDouble();
     return Telemetry(
       device: '${j['device'] ?? 'Growatt inverter'}',
       plant: '${j['plant_name'] ?? 'My solar plant'}',
@@ -73,6 +83,13 @@ class Telemetry {
       total: n('total_kwh'),
       temp: n('temperature_c'),
       voltage: n('grid_voltage_v'),
+      batterySoc: optional('battery_soc'),
+      batteryCharge: optional('battery_charge_w'),
+      batteryDischarge: optional('battery_discharge_w'),
+      batteryVoltage: optional('battery_voltage_v'),
+      homeLoad: optional('home_load_w'),
+      gridImport: optional('grid_import_w'),
+      gridExport: optional('grid_export_w'),
       history: (j['history'] as List? ?? [])
           .map((e) => Sample.fromJson(Map<String, dynamic>.from(e)))
           .toList(),
@@ -92,6 +109,13 @@ class Telemetry {
       total: 2327.1,
       temp: 41.2,
       voltage: 231.4,
+      batterySoc: 68,
+      batteryCharge: 1200,
+      batteryDischarge: 0,
+      batteryVoltage: 51.8,
+      homeLoad: 1850,
+      gridImport: 0,
+      gridExport: 190,
       demo: true,
       history: List.generate(
         25,
@@ -115,12 +139,20 @@ class DashboardLayout {
   final String title, density;
   final List<String> sections, metrics;
   final int chartHours;
-  static const allowedSections = {'hero', 'metrics', 'chart'};
-  static const allowedMetrics = {'total', 'temperature', 'voltage', 'updated'};
+  static const allowedSections = {'hero', 'flow', 'metrics', 'chart'};
+  static const allowedMetrics = {
+    'total',
+    'battery',
+    'load',
+    'grid',
+    'temperature',
+    'voltage',
+    'updated',
+  };
   factory DashboardLayout.defaults() => const DashboardLayout(
     title: 'Energy at a glance',
-    sections: ['hero', 'metrics', 'chart'],
-    metrics: ['total', 'temperature', 'voltage', 'updated'],
+    sections: ['hero', 'flow', 'metrics', 'chart'],
+    metrics: ['battery', 'load', 'grid', 'updated'],
     chartHours: 24,
     density: 'comfortable',
   );
@@ -196,7 +228,7 @@ class _DashboardState extends State<Dashboard> {
 
   Future<void> loadLayout() async {
     final prefs = await SharedPreferences.getInstance();
-    final saved = prefs.getString('heliocanvas.layout.v1');
+    final saved = prefs.getString('heliocanvas.layout.v2');
     if (saved != null && mounted) {
       try {
         setState(() => layout = DashboardLayout.fromJson(jsonDecode(saved)));
@@ -213,13 +245,19 @@ class _DashboardState extends State<Dashboard> {
       'total_kwh': data.total,
       'temperature_c': data.temp,
       'grid_voltage_v': data.voltage,
+      'battery_soc': data.batterySoc,
+      'battery_charge_w': data.batteryCharge,
+      'battery_discharge_w': data.batteryDischarge,
+      'home_load_w': data.homeLoad,
+      'grid_import_w': data.gridImport,
+      'grid_export_w': data.gridExport,
     });
     if (mounted) {
       if (r != null) {
         final next = DashboardLayout.fromJson(r);
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString(
-          'heliocanvas.layout.v1',
+          'heliocanvas.layout.v2',
           jsonEncode(next.toJson()),
         );
         setState(() {
@@ -246,7 +284,7 @@ class _DashboardState extends State<Dashboard> {
 
   Future<void> resetLayout() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('heliocanvas.layout.v1');
+    await prefs.remove('heliocanvas.layout.v2');
     if (mounted) {
       setState(() => layout = DashboardLayout.defaults());
       await refresh();
@@ -292,6 +330,7 @@ class _DashboardState extends State<Dashboard> {
                         ...layout.sections.expand((section) {
                           final widget = switch (section) {
                             'hero' => HeroCard(data: data),
+                            'flow' => EnergyFlow(data: data),
                             'metrics' => MetricGrid(
                               data: data,
                               order: layout.metrics,
@@ -579,6 +618,159 @@ class HeroCard extends StatelessWidget {
   );
 }
 
+class EnergyFlow extends StatelessWidget {
+  const EnergyFlow({required this.data, super.key});
+  final Telemetry data;
+
+  @override
+  Widget build(BuildContext context) {
+    final batteryPower = (data.batteryDischarge ?? 0) > 0
+        ? data.batteryDischarge
+        : data.batteryCharge;
+    final batteryDirection = (data.batteryDischarge ?? 0) > 0
+        ? 'Discharging'
+        : (data.batteryCharge ?? 0) > 0
+        ? 'Charging'
+        : 'Idle';
+    final gridPower = (data.gridImport ?? 0) > 0
+        ? data.gridImport
+        : data.gridExport;
+    final gridDirection = (data.gridImport ?? 0) > 0
+        ? 'Importing'
+        : (data.gridExport ?? 0) > 0
+        ? 'Exporting'
+        : 'Balanced';
+
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: const Color(0xffe6e8e0)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Energy flow',
+            style: TextStyle(fontWeight: FontWeight.w900, fontSize: 18),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            data.demo
+                ? 'Illustrative values until the first logger packet arrives.'
+                : 'Live values reported by the inverter and connected meter.',
+            style: const TextStyle(color: Color(0xff727970), fontSize: 13),
+          ),
+          const SizedBox(height: 18),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final width = constraints.maxWidth;
+              final columns = width >= 860
+                  ? 4
+                  : width >= 460
+                  ? 2
+                  : 1;
+              final cardWidth = (width - (columns - 1) * 12) / columns;
+              return Wrap(
+                spacing: 12,
+                runSpacing: 12,
+                children: [
+                  FlowNode(
+                    width: cardWidth,
+                    label: 'Solar production',
+                    value: formatOptionalPower(data.watts),
+                    detail: '${data.today.toStringAsFixed(1)} kWh today',
+                    icon: Icons.wb_sunny_rounded,
+                    color: const Color(0xffffc53d),
+                  ),
+                  FlowNode(
+                    width: cardWidth,
+                    label: 'Home consumption',
+                    value: formatOptionalPower(data.homeLoad),
+                    detail: data.homeLoad == null
+                        ? 'Needs inverter or smart-meter support'
+                        : 'Current household load',
+                    icon: Icons.home_rounded,
+                    color: const Color(0xff9ed8c3),
+                  ),
+                  FlowNode(
+                    width: cardWidth,
+                    label: 'Battery',
+                    value: data.batterySoc == null
+                        ? 'Not reported'
+                        : '${data.batterySoc!.toStringAsFixed(0)}%',
+                    detail: batteryPower == null
+                        ? 'Needs a supported battery inverter'
+                        : '$batteryDirection · ${formatPower(batteryPower)}',
+                    icon: Icons.battery_charging_full_rounded,
+                    color: const Color(0xffb8c5ef),
+                  ),
+                  FlowNode(
+                    width: cardWidth,
+                    label: 'Grid',
+                    value: formatOptionalPower(gridPower),
+                    detail: data.gridImport == null && data.gridExport == null
+                        ? 'Needs a connected smart meter'
+                        : gridDirection,
+                    icon: Icons.electrical_services_rounded,
+                    color: const Color(0xffff9364),
+                  ),
+                ],
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class FlowNode extends StatelessWidget {
+  const FlowNode({
+    required this.width,
+    required this.label,
+    required this.value,
+    required this.detail,
+    required this.icon,
+    required this.color,
+    super.key,
+  });
+  final double width;
+  final String label, value, detail;
+  final IconData icon;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    width: width,
+    constraints: const BoxConstraints(minHeight: 142),
+    padding: const EdgeInsets.all(18),
+    decoration: BoxDecoration(
+      color: color.withValues(alpha: .18),
+      borderRadius: BorderRadius.circular(19),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 25),
+        const SizedBox(height: 14),
+        Text(label, style: const TextStyle(color: Color(0xff657066))),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900),
+        ),
+        const SizedBox(height: 3),
+        Text(
+          detail,
+          style: const TextStyle(fontSize: 12, color: Color(0xff657066)),
+        ),
+      ],
+    ),
+  );
+}
+
 class MetricGrid extends StatelessWidget {
   const MetricGrid({required this.data, required this.order, super.key});
   final Telemetry data;
@@ -603,6 +795,30 @@ class MetricGrid extends StatelessWidget {
           'Inverter temperature',
           '${data.temp.toStringAsFixed(1)} °C',
           Icons.device_thermostat_rounded,
+          const Color(0xffff9364),
+        ),
+        'battery': Metric(
+          'Battery state',
+          data.batterySoc == null
+              ? 'Not reported'
+              : '${data.batterySoc!.toStringAsFixed(0)}%',
+          Icons.battery_charging_full_rounded,
+          const Color(0xffb8c5ef),
+        ),
+        'load': Metric(
+          'Home load',
+          formatOptionalPower(data.homeLoad),
+          Icons.home_rounded,
+          const Color(0xff9ed8c3),
+        ),
+        'grid': Metric(
+          'Grid flow',
+          data.gridImport == null && data.gridExport == null
+              ? 'Not reported'
+              : (data.gridImport ?? 0) > 0
+              ? '↓ ${formatPower(data.gridImport!)}'
+              : '↑ ${formatPower(data.gridExport!)}',
+          Icons.swap_vert_rounded,
           const Color(0xffff9364),
         ),
         'voltage': Metric(
@@ -843,7 +1059,8 @@ class AiPanel extends StatelessWidget {
           minLines: 2,
           maxLines: 4,
           decoration: InputDecoration(
-            hintText: 'Example: Put the chart first, show only power and temperature, and use a compact layout.',
+            hintText:
+                'Example: Put the chart first, show only power and temperature, and use a compact layout.',
             filled: true,
             fillColor: Colors.white,
             border: OutlineInputBorder(
@@ -882,3 +1099,6 @@ class AiPanel extends StatelessWidget {
 String formatPower(double w) => w >= 1000
     ? '${(w / 1000).toStringAsFixed(2)} kW'
     : '${w.toStringAsFixed(0)} W';
+
+String formatOptionalPower(double? watts) =>
+    watts == null ? 'Not reported' : formatPower(watts);

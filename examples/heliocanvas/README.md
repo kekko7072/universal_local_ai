@@ -47,11 +47,11 @@ Requirements: Docker Engine with Compose v2, a fixed LAN IP, enough disk space f
 
 The `.env` file is intentionally ignored by Git. Keep machine-specific values there; publish only `.env.example`.
 
-Open `http://YOUR_SERVER_IP:8080`. The page shows demo data until the first valid Growatt packet arrives.
+Open `http://YOUR_SERVER_IP:8080`. A fresh installation shows an awaiting-data state until the first valid Growatt packet arrives.
 
 ### First-run demo
 
-The default Compose configuration sets `MOCK_DATA: "true"`. On an empty database the API produces a realistic daylight curve and labels it **DEMO DATA**, so the dashboard and prompt-driven layout composer work immediately in Chrome.
+Real-data mode is the default. To preview the interface before connecting a logger, set `MOCK_DATA=true` in `.env` and rerun setup. The API then produces a realistic daylight curve and labels it **DEMO DATA**.
 
 Try this before touching the logger:
 
@@ -60,7 +60,16 @@ Try this before touching the logger:
 3. Prompt: `Put the chart first and use a compact layout, focus only on temperature.`
 4. Select **Compose & save**, then reload the page to verify that Chrome retained the layout.
 
-Mock mode is only a fallback. The first real MQTT packet takes precedence automatically. To show zeros instead while waiting for a logger, change `MOCK_DATA` to `"false"` and rerun `./setup.sh`.
+Mock mode is only a preview. The first real MQTT packet takes precedence automatically. Set `MOCK_DATA=false` and rerun `./setup.sh` before validating a real installation.
+
+### Understanding the dashboard
+
+- **LIVE** means at least one real logger packet has been stored recently.
+- **OFFLINE** means the system is waiting for a packet or the latest packet is stale.
+- **DEMO DATA** always means simulated values, never measurements from the inverter.
+- Battery, home-load, grid-import, and grid-export cards show **Not reported** when the installed inverter, battery, or smart meter does not include those values.
+
+Hybrid and off-grid Growatt payloads are normalized from Grott fields such as `batterySoc`/`SOC`, `p1charge1`, `pdischarge1`, `plocaloadtot`, `pactousertot`, and `pactogridtot`. Exact availability depends on the inverter family, firmware, battery, and smart-meter installation.
 
 ## Connect a real Growatt system
 

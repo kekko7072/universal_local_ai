@@ -27,7 +27,7 @@ services:
       DB_PATH: /data/solar.db
       OLLAMA_URL: ${OLLAMA_URL:-http://host.docker.internal:11434}
       OLLAMA_MODEL: ${OLLAMA_MODEL:-gemma3:1b}
-      MOCK_DATA: ${MOCK_DATA:-true}
+      MOCK_DATA: ${MOCK_DATA:-false}
       PLANT_NAME: ${PLANT_NAME:-My solar plant}
       RATED_POWER_KW: ${RATED_POWER_KW:-0}
       LOGGER_MODEL: ${LOGGER_MODEL:-ShineWiFi-X}
