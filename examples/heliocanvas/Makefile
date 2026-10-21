@@ -1,9 +1,12 @@
 COMPOSE = docker compose -f docker-compose.yml -f docker-compose.local-ai.yml
 
-.PHONY: setup demo up down logs status verify test
+.PHONY: setup uninstall demo up down logs status verify test
 
 setup:
 	./setup.sh
+
+uninstall:
+	./uninstall.sh
 
 demo up:
 	$(COMPOSE) up -d --build

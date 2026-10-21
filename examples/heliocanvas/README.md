@@ -145,6 +145,22 @@ flutter run -d chrome
 
 The telemetry API is documented at `http://YOUR_SERVER_IP:8080/api/health`. Raw packets are retained in SQLite to make new inverter-field mappings debuggable. Add aliases in `backend/main.py` if your inverter uses different Growatt keys.
 
+## Uninstall
+
+Remove only HelioCanvas containers, images, volumes, telemetry, local AI models, generated files, and the private `.env`:
+
+```bash
+./uninstall.sh
+```
+
+To also remove every Docker workload on the server, uninstall Docker Engine, and delete all Docker runtime data, use the explicitly destructive system-wide mode:
+
+```bash
+./uninstall.sh --purge-docker
+```
+
+The script requires a typed confirmation and preserves this Git checkout, allowing future `git pull` operations. The `--purge-docker` option affects unrelated Docker applications on the same server.
+
 ## Security and privacy
 
 - MQTT is intentionally available only inside the Docker network.
