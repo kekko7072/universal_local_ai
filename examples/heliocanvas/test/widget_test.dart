@@ -32,4 +32,26 @@ void main() {
     );
     expect(find.text('Production · last 7 days'), findsOneWidget);
   });
+
+  testWidgets('mobile navigation opens every dashboard tab', (tester) async {
+    await tester.pumpWidget(const SolarApp());
+
+    await tester.tap(find.text('Trends'));
+    await tester.pump();
+    expect(find.text('Production trends'), findsOneWidget);
+
+    await tester.tap(find.text('Energy'));
+    await tester.pump();
+    expect(find.text('Where your energy goes'), findsOneWidget);
+    expect(find.text('Energy flow'), findsOneWidget);
+
+    await tester.tap(find.text('System'));
+    await tester.pump();
+    expect(find.text('System & connection'), findsOneWidget);
+    expect(find.text('Measurements detected'), findsOneWidget);
+
+    await tester.tap(find.text('Overview'));
+    await tester.pump();
+    expect(find.text('Energy at a glance'), findsOneWidget);
+  });
 }

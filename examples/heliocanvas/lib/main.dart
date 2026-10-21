@@ -194,9 +194,12 @@ class Dashboard extends StatefulWidget {
   State<Dashboard> createState() => _DashboardState();
 }
 
+enum DashboardView { overview, trends, energy, system }
+
 class _DashboardState extends State<Dashboard> {
   Telemetry data = Telemetry.demo();
   DashboardLayout layout = DashboardLayout.defaults();
+  DashboardView selectedView = DashboardView.overview;
   Timer? timer;
   bool aiOpen = false, aiBusy = false;
   String goal =
@@ -297,87 +300,163 @@ class _DashboardState extends State<Dashboard> {
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    body: SafeArea(
-      child: Row(
-        children: [
-          if (MediaQuery.sizeOf(context).width >= 920) const SideRail(),
-          Expanded(
-            child: RefreshIndicator(
-              onRefresh: refresh,
-              child: CustomScrollView(
-                slivers: [
-                  SliverPadding(
-                    padding: const EdgeInsets.fromLTRB(28, 24, 28, 42),
-                    sliver: SliverList.list(
-                      children: [
-                        Header(
-                          data: data,
-                          title: layout.title,
-                          onAi: () => setState(() => aiOpen = !aiOpen),
-                        ),
-                        const SizedBox(height: 25),
-                        if (aiOpen) ...[
-                          AiPanel(
-                            goal: goal,
-                            busy: aiBusy,
-                            onGoal: (v) => goal = v,
-                            onGenerate: generate,
-                            onReset: resetLayout,
+  Widget build(BuildContext context) {
+    final desktop = MediaQuery.sizeOf(context).width >= 920;
+    final title = switch (selectedView) {
+      DashboardView.overview => layout.title,
+      DashboardView.trends => 'Production trends',
+      DashboardView.energy => 'Where your energy goes',
+      DashboardView.system => 'System & connection',
+    };
+    final viewWidgets = switch (selectedView) {
+      DashboardView.overview => layout.sections.map((section) {
+        return switch (section) {
+          'hero' => HeroCard(data: data),
+          'flow' => EnergyFlow(data: data),
+          'metrics' => MetricGrid(data: data, order: layout.metrics),
+          'chart' => PowerChart(data: data, hours: layout.chartHours),
+          _ => const SizedBox.shrink(),
+        };
+      }).toList(),
+      DashboardView.trends => <Widget>[
+        PowerChart(data: data, hours: layout.chartHours),
+        MetricGrid(
+          data: data,
+          order: const ['total', 'temperature', 'voltage', 'updated'],
+        ),
+      ],
+      DashboardView.energy => <Widget>[
+        EnergyFlow(data: data),
+        MetricGrid(
+          data: data,
+          order: const ['battery', 'load', 'grid', 'total'],
+        ),
+      ],
+      DashboardView.system => <Widget>[SystemPanel(data: data)],
+    };
+    return Scaffold(
+      bottomNavigationBar: desktop
+          ? null
+          : NavigationBar(
+              selectedIndex: selectedView.index,
+              onDestinationSelected: (index) =>
+                  setState(() => selectedView = DashboardView.values[index]),
+              destinations: const [
+                NavigationDestination(
+                  icon: Icon(Icons.grid_view_rounded),
+                  label: 'Overview',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.show_chart_rounded),
+                  label: 'Trends',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.bolt_rounded),
+                  label: 'Energy',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.settings_outlined),
+                  label: 'System',
+                ),
+              ],
+            ),
+      body: SafeArea(
+        child: Row(
+          children: [
+            if (desktop)
+              SideRail(
+                selected: selectedView,
+                onSelected: (view) => setState(() => selectedView = view),
+              ),
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: refresh,
+                child: CustomScrollView(
+                  slivers: [
+                    SliverPadding(
+                      padding: const EdgeInsets.fromLTRB(28, 24, 28, 42),
+                      sliver: SliverList.list(
+                        children: [
+                          Header(
+                            data: data,
+                            title: title,
+                            onAi: () => setState(() {
+                              selectedView = DashboardView.overview;
+                              aiOpen = !aiOpen;
+                            }),
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 25),
+                          if (aiOpen) ...[
+                            AiPanel(
+                              goal: goal,
+                              busy: aiBusy,
+                              onGoal: (v) => goal = v,
+                              onGenerate: generate,
+                              onReset: resetLayout,
+                            ),
+                            const SizedBox(height: 16),
+                          ],
+                          ...viewWidgets.expand((widget) {
+                            return [
+                              widget,
+                              SizedBox(
+                                height: layout.density == 'compact' ? 10 : 16,
+                              ),
+                            ];
+                          }),
                         ],
-                        ...layout.sections.expand((section) {
-                          final widget = switch (section) {
-                            'hero' => HeroCard(data: data),
-                            'flow' => EnergyFlow(data: data),
-                            'metrics' => MetricGrid(
-                              data: data,
-                              order: layout.metrics,
-                            ),
-                            'chart' => PowerChart(
-                              data: data,
-                              hours: layout.chartHours,
-                            ),
-                            _ => const SizedBox.shrink(),
-                          };
-                          return [
-                            widget,
-                            SizedBox(
-                              height: layout.density == 'compact' ? 10 : 16,
-                            ),
-                          ];
-                        }),
-                      ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
-    ),
-  );
+    );
+  }
 }
 
 class SideRail extends StatelessWidget {
-  const SideRail({super.key});
+  const SideRail({required this.selected, required this.onSelected, super.key});
+  final DashboardView selected;
+  final ValueChanged<DashboardView> onSelected;
   @override
   Widget build(BuildContext context) => Container(
     width: 88,
     color: const Color(0xff17201b),
-    child: const Column(
+    child: Column(
       children: [
-        SizedBox(height: 24),
-        Logo(),
-        SizedBox(height: 40),
-        RailIcon(Icons.grid_view_rounded, true),
-        RailIcon(Icons.show_chart_rounded, false),
-        RailIcon(Icons.bolt_rounded, false),
-        Spacer(),
-        RailIcon(Icons.settings_outlined, false),
-        SizedBox(height: 20),
+        const SizedBox(height: 24),
+        const Logo(),
+        const SizedBox(height: 40),
+        RailIcon(
+          Icons.grid_view_rounded,
+          selected == DashboardView.overview,
+          label: 'Overview',
+          onTap: () => onSelected(DashboardView.overview),
+        ),
+        RailIcon(
+          Icons.show_chart_rounded,
+          selected == DashboardView.trends,
+          label: 'Trends',
+          onTap: () => onSelected(DashboardView.trends),
+        ),
+        RailIcon(
+          Icons.bolt_rounded,
+          selected == DashboardView.energy,
+          label: 'Energy flow',
+          onTap: () => onSelected(DashboardView.energy),
+        ),
+        const Spacer(),
+        RailIcon(
+          Icons.settings_outlined,
+          selected == DashboardView.system,
+          label: 'System',
+          onTap: () => onSelected(DashboardView.system),
+        ),
+        const SizedBox(height: 20),
       ],
     ),
   );
@@ -398,9 +477,17 @@ class Logo extends StatelessWidget {
 }
 
 class RailIcon extends StatelessWidget {
-  const RailIcon(this.icon, this.active, {super.key});
+  const RailIcon(
+    this.icon,
+    this.active, {
+    required this.label,
+    required this.onTap,
+    super.key,
+  });
   final IconData icon;
   final bool active;
+  final String label;
+  final VoidCallback onTap;
   @override
   Widget build(BuildContext context) => Padding(
     padding: const EdgeInsets.symmetric(vertical: 8),
@@ -411,9 +498,13 @@ class RailIcon extends StatelessWidget {
         color: active ? Colors.white12 : Colors.transparent,
         borderRadius: BorderRadius.circular(14),
       ),
-      child: Icon(
-        icon,
-        color: active ? const Color(0xffffc53d) : Colors.white54,
+      child: IconButton(
+        tooltip: label,
+        onPressed: onTap,
+        icon: Icon(
+          icon,
+          color: active ? const Color(0xffffc53d) : Colors.white54,
+        ),
       ),
     ),
   );
@@ -614,6 +705,175 @@ class HeroCard extends StatelessWidget {
                 children: [power, sun],
               );
       },
+    ),
+  );
+}
+
+class SystemPanel extends StatelessWidget {
+  const SystemPanel({required this.data, super.key});
+  final Telemetry data;
+
+  @override
+  Widget build(BuildContext context) {
+    final source = data.demo
+        ? 'Demo data'
+        : data.online
+        ? 'Live logger'
+        : 'Waiting';
+    final sourceColor = data.demo
+        ? const Color(0xffc98625)
+        : data.online
+        ? const Color(0xff3c9c62)
+        : const Color(0xffa64b45);
+    final capabilities = <(String, bool)>[
+      ('Solar production', true),
+      ('Battery state', data.batterySoc != null),
+      ('Home consumption', data.homeLoad != null),
+      (
+        'Grid import/export',
+        data.gridImport != null || data.gridExport != null,
+      ),
+    ];
+
+    return Container(
+      padding: const EdgeInsets.all(26),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: const Color(0xffe6e8e0)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 12,
+                height: 12,
+                decoration: BoxDecoration(
+                  color: sourceColor,
+                  shape: BoxShape.circle,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                source,
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            data.demo
+                ? 'These values are simulated. Set MOCK_DATA=false before validating your installation.'
+                : data.online
+                ? 'A recent packet from ${data.device} is stored locally.'
+                : 'Point the logger to this server on TCP port 5279 and wait for its next packet.',
+            style: const TextStyle(color: Color(0xff657066), height: 1.45),
+          ),
+          const SizedBox(height: 24),
+          Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: [
+              SystemFact(
+                label: 'Plant',
+                value: data.plant,
+                icon: Icons.solar_power_rounded,
+              ),
+              SystemFact(
+                label: 'Device',
+                value: data.device,
+                icon: Icons.memory_rounded,
+              ),
+              SystemFact(
+                label: 'Last sample',
+                value: DateFormat('dd MMM · HH:mm:ss').format(data.updated),
+                icon: Icons.schedule_rounded,
+              ),
+            ],
+          ),
+          const SizedBox(height: 28),
+          const Text(
+            'Measurements detected',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
+          ),
+          const SizedBox(height: 12),
+          ...capabilities.map(
+            (capability) => Padding(
+              padding: const EdgeInsets.symmetric(vertical: 6),
+              child: Row(
+                children: [
+                  Icon(
+                    capability.$2
+                        ? Icons.check_circle_rounded
+                        : Icons.remove_circle_outline_rounded,
+                    size: 20,
+                    color: capability.$2
+                        ? const Color(0xff3c9c62)
+                        : const Color(0xff9aa198),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(capability.$1),
+                  const Spacer(),
+                  Text(
+                    capability.$2 ? 'Available' : 'Not reported',
+                    style: const TextStyle(color: Color(0xff727970)),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class SystemFact extends StatelessWidget {
+  const SystemFact({
+    required this.label,
+    required this.value,
+    required this.icon,
+    super.key,
+  });
+  final String label, value;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    width: 240,
+    padding: const EdgeInsets.all(16),
+    decoration: BoxDecoration(
+      color: const Color(0xfff4f5ef),
+      borderRadius: BorderRadius.circular(16),
+    ),
+    child: Row(
+      children: [
+        Icon(icon, color: const Color(0xff368857)),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: const TextStyle(fontSize: 11, color: Color(0xff727970)),
+              ),
+              const SizedBox(height: 3),
+              Text(
+                value,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontWeight: FontWeight.w800),
+              ),
+            ],
+          ),
+        ),
+      ],
     ),
   );
 }
