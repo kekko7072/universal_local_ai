@@ -16,6 +16,7 @@ services:
       - "${GROTT_PORT:-5279}:5279"
     volumes:
       - ./config/grott.ini:/app/grott.ini:ro
+      - ./config/recwl.txt:/app/recwl.txt:ro
     networks: [solar]
   api:
     build: ./backend
